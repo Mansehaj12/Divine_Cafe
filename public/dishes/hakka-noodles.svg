@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 350" width="400" height="350">
+  <defs>
+    <linearGradient id="grad_hakka-noodles.svg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#14532d" />
+      <stop offset="100%" stop-color="#22c55e" />
+    </linearGradient>
+    <filter id="shadow_hakka-noodles.svg" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="6" stdDeviation="10" flood-color="rgba(0,0,0,0.15)" />
+    </filter>
+  </defs>
+
+  <!-- Card Background -->
+  <rect width="400" height="350" rx="28" fill="url(#grad_hakka-noodles.svg)" />
+  
+  <!-- Subtle circular frame -->
+  <circle cx="200" cy="145" r="95" fill="none" stroke="rgba(255,255,255,0.18)" stroke-width="2" stroke-dasharray="6 6" />
+  <circle cx="200" cy="145" r="80" fill="rgba(255,255,255,0.15)" filter="url(#shadow_hakka-noodles.svg)" />
+
+  <!-- Pure Veg Badge Top Left -->
+  <g transform="translate(24, 24)">
+    <rect width="30" height="30" rx="6" fill="#ffffff" />
+    <rect x="3" y="3" width="24" height="24" rx="4" fill="none" stroke="#15803d" stroke-width="2" />
+    <circle cx="15" cy="15" r="6" fill="#15803d" />
+  </g>
+
+  <!-- Tagline Top Right -->
+  <text x="376" y="44" text-anchor="end" fill="rgba(255,255,255,0.85)" font-family="system-ui, sans-serif" font-size="12" font-weight="700" letter-spacing="1.5">DIVINE CAFE</text>
+
+  <!-- Center Graphic Icon -->
+  <text x="200" y="160" text-anchor="middle" dominant-baseline="middle" font-size="76">🥢</text>
+
+  <!-- Bottom Title Label Platter -->
+  <rect x="24" y="255" width="352" height="70" rx="18" fill="#ffffff" filter="url(#shadow_hakka-noodles.svg)" />
+  <text x="200" y="286" text-anchor="middle" fill="#143826" font-family="Georgia, serif" font-size="20" font-weight="bold">Hakka Noodles</text>
+  <text x="200" y="308" text-anchor="middle" fill="#16a34a" font-family="system-ui, sans-serif" font-size="11" font-weight="700" letter-spacing="1">WOK-TOSSED SHREDDED VEGGIES</text>
+</svg>

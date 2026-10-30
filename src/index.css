@@ -1,0 +1,75 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    background-color: #FAF8F5;
+    color: #1a2a20;
+    font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+
+  ::selection {
+    background-color: #234438;
+    color: #FAF7F2;
+  }
+}
+
+/* Custom delicate leaf watermarks and textures */
+.bg-grain {
+  background-image: radial-gradient(rgba(26, 55, 45, 0.05) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+/* FSSAI Pure Veg Badge */
+.veg-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 16px;
+  height: 16px;
+  border: 1.5px solid #15803d;
+  border-radius: 3px;
+  background-color: #ffffff;
+  padding: 1px;
+}
+
+.veg-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background-color: #15803d;
+}
+
+/* Custom smooth scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f4efe5;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9dc2b0;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #4c866f;
+}
+
+/* Category slider hide scrollbar */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
