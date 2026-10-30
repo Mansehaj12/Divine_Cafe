@@ -102,7 +102,6 @@ export default function App() {
         <Footer 
           onOpenMenuScans={() => setIsScansModalOpen(true)}
           onOpenOwnerNotes={() => setIsNotesModalOpen(true)}
-          onOpenKitchen={openKitchenView}
         />
 
         {/* Floating Quick Menu Navigator (Mobile & Desktop bottom right) */}
