@@ -1,10 +1,12 @@
 import React from 'react';
 import { ArrowDown, MapPin, Sparkles, Coffee, Utensils, HeartHandshake } from 'lucide-react';
 import { cafeConfig } from '../data/cafeConfig';
+import OrderTypeSelector from './OrderTypeSelector';
+import HeroBestsellerTicker from './HeroBestsellerTicker';
 
 export default function Hero() {
   return (
-    <section id="home" className="relative pt-28 pb-16 lg:pt-36 lg:pb-24 overflow-hidden bg-gradient-to-b from-[#143826] via-[#1a422e] to-[#234d36] text-cream-100">
+    <section id="home" className="relative pt-24 pb-14 lg:pt-32 lg:pb-20 overflow-hidden bg-gradient-to-b from-[#143826] via-[#1a422e] to-[#234d36] text-cream-100">
       {/* Subtle organic background foliage ornaments */}
       <div className="absolute inset-0 opacity-10 pointer-events-none bg-[radial-gradient(#d5dcc3_1px,transparent_1px)] [background-size:24px_24px]"></div>
       
@@ -16,8 +18,13 @@ export default function Hero() {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
           
           {/* Left Column: Brand & Copy */}
-          <div className="lg:col-span-7 space-y-6 sm:space-y-8 text-center lg:text-left">
+          <div className="lg:col-span-7 space-y-5 sm:space-y-6 text-center lg:text-left">
             
+            {/* Segmented Dual Box: Dine-In vs Takeaway (At the Very Top) */}
+            <div className="pb-1 max-w-sm mx-auto lg:mx-0">
+              <OrderTypeSelector />
+            </div>
+
             {/* Tagline Pill */}
             <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-forest-800/80 border border-olive-400/30 text-olive-300 text-xs sm:text-sm font-medium tracking-wide shadow-sm">
               <span className="w-2 h-2 rounded-full bg-olive-400 animate-ping"></span>
@@ -36,10 +43,8 @@ export default function Hero() {
               </h1>
             </div>
 
-            {/* Supporting Copy */}
-            <p className="text-base sm:text-lg text-cream-200/90 font-light leading-relaxed max-w-2xl mx-auto lg:mx-0">
-              {cafeConfig.heroDescription}
-            </p>
+            {/* Dynamic Moving Bestsellers Spotlight replacing static text */}
+            <HeroBestsellerTicker />
 
             {/* Call to Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">

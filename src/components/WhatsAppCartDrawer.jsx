@@ -13,6 +13,10 @@ export default function WhatsAppCartDrawer() {
     updateQuantity,
     removeFromCart,
     clearCart,
+    tableNumber,
+    updateTableNumber,
+    diningMode,
+    updateDiningMode,
     getWhatsAppMessage
   } = useCart();
 
@@ -119,6 +123,57 @@ export default function WhatsAppCartDrawer() {
                   </div>
                 ) : (
                   <>
+                    {/* Dine-In / Takeaway Toggle inside Drawer */}
+                    <div className="p-3 bg-cream-100/70 rounded-2xl border border-cream-200/80 space-y-2">
+                      <div className="flex items-center justify-between text-xs">
+                        <span className="font-bold text-forest-950">Order Type:</span>
+                        <div className="flex items-center gap-1 bg-white p-1 rounded-xl border border-cream-200">
+                          <button
+                            type="button"
+                            onClick={() => updateDiningMode('dine-in')}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                              diningMode === 'dine-in'
+                                ? 'bg-forest-800 text-white shadow-xs'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            🍽️ Dine-In
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => updateDiningMode('takeaway')}
+                            className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all ${
+                              diningMode === 'takeaway'
+                                ? 'bg-forest-800 text-white shadow-xs'
+                                : 'text-gray-600 hover:text-gray-900'
+                            }`}
+                          >
+                            🛍️ Takeaway
+                          </button>
+                        </div>
+                      </div>
+
+                      {diningMode === 'dine-in' && (
+                        <div className="pt-2 border-t border-cream-200/60 flex items-center justify-between gap-2">
+                          <span className="text-xs text-gray-600">Table Number:</span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="text-xs font-bold font-serif text-forest-900">
+                              {tableNumber ? `#${tableNumber}` : 'Not specified'}
+                            </span>
+                            <input
+                              type="number"
+                              min="1"
+                              max="99"
+                              value={tableNumber}
+                              onChange={(e) => updateTableNumber(e.target.value)}
+                              placeholder="Table #"
+                              className="w-16 text-center text-xs font-bold py-1 px-1.5 rounded-lg border border-cream-300 bg-white text-forest-950 focus:outline-none focus:ring-1 focus:ring-forest-600"
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
                     <div className="flex items-center justify-between pb-2 border-b border-cream-200">
                       <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
                         Selected Items
