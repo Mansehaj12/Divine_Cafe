@@ -2,7 +2,7 @@ import React from 'react';
 import { Leaf, Heart, Sparkles, MapPin, Phone, ShieldCheck } from 'lucide-react';
 import { cafeConfig } from '../data/cafeConfig';
 
-export default function Footer({ onOpenMenuScans, onOpenOwnerNotes }) {
+export default function Footer({ onOpenMenuScans, onOpenOwnerNotes, onOpenKitchen }) {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -98,10 +98,21 @@ export default function Footer({ onOpenMenuScans, onOpenOwnerNotes }) {
         {/* Bottom Bar */}
         <div className="pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-cream-400/60 text-center sm:text-left">
           <p>© {currentYear} {cafeConfig.brandName}. All rights reserved.</p>
-          <p className="flex items-center gap-1.5 justify-center">
-            <span>Designed with love & cozy elegance for</span>
-            <span className="text-cream-200 font-medium">{cafeConfig.brandName}</span>
-          </p>
+          <div className="flex items-center gap-4 justify-center">
+            {onOpenKitchen && (
+              <button
+                onClick={onOpenKitchen}
+                className="text-cream-400/60 hover:text-olive-300 transition-colors flex items-center gap-1 text-[11px]"
+              >
+                <span>🔐</span>
+                <span>Staff & Kitchen Desk</span>
+              </button>
+            )}
+            <p className="flex items-center gap-1.5 justify-center">
+              <span>Designed with love & cozy elegance for</span>
+              <span className="text-cream-200 font-medium">{cafeConfig.brandName}</span>
+            </p>
+          </div>
         </div>
 
       </div>

@@ -33,7 +33,15 @@ Built with **React 18**, **Vite**, and **Tailwind CSS**, designed with an elegan
   *Special Instructions:* Please serve pizza extra hot!
   ```
 
-### 2. 📸 Auto-Sliding Bestseller Photo Showcase
+### 2. 🧾 Real-Time Kitchen & Billing Desk (Live KOT Dashboard)
+* **Access Route:** Visit `/#orders` or click **"🔐 Staff & Kitchen Desk"** in the footer.
+* **4-Digit Staff PIN Security:** Protected by staff PIN (Default: `1470`, configurable in `cafeConfig.js`). Remembers login session so staff only enter it once.
+* **Realistic Two-Tone Brass Service Bell:** Synthesized via Web Audio API (zero external MP3 files, 100% reliable across all browsers & devices). Rings whenever a new order is received.
+* **Thermal Slip Printing (KOT):** 1-click printer integration formatted specifically for **58mm / 80mm thermal receipt printers** and standard printers.
+* **Kitchen Workflow Pipeline:** `New Order (Pending)` ➔ `🍳 Start Cooking (In Kitchen)` ➔ `✅ Mark as Served`.
+* **Zero Customer Confusion:** Customer only sees a clean `[ Place Order & Send Slip to Kitchen ]` button. Both Owner and Staff can open the dashboard link on their phones simultaneously.
+
+### 3. 📸 Auto-Sliding Bestseller Photo Showcase
 * High-resolution, full-bleed visual slider replacing static text in the hero section.
 * Auto-slides every **3.5 seconds** through signature dishes (*Paneer Makhni Pizza*, *Mix Veg Poha*, *Blue Lagoon Mojito*, *Mix Sauce Pasta*, *Royal Paneer Burger*, *Organic Masala Chai*).
 * Features subtle cross-fading, progress dots, hover controls, and 1-tap smooth scrolling straight to that dish in the digital menu.

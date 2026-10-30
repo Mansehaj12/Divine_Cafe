@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { X, Trash2, Plus, Minus, Send, ShoppingBag, ArrowRight } from 'lucide-react';
+import { X, Trash2, Plus, Minus, Send, ShoppingBag, ArrowRight, CheckCircle2, Clock, Utensils } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cafeConfig } from '../data/cafeConfig';
+import { createOrder } from '../services/orderService';
 
 export default function WhatsAppCartDrawer() {
   const {
@@ -13,12 +14,15 @@ export default function WhatsAppCartDrawer() {
     updateQuantity,
     removeFromCart,
     clearCart,
+    tableNumber,
     diningMode,
     updateDiningMode,
     getWhatsAppMessage
   } = useCart();
 
   const [notes, setNotes] = useState('');
+  const [placedOrder, setPlacedOrder] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const isWhatsappConfigured = cafeConfig.isWhatsappProvided;
 
   // Prevent background menu scrolling when drawer is open
@@ -33,20 +37,38 @@ export default function WhatsAppCartDrawer() {
     }
   }, [isDrawerOpen]);
 
-  const handleSendOrder = (deskKey = selectedDesk) => {
-    const activeDesk = cafeConfig.desks?.[deskKey] || {
-      number: cafeConfig.whatsappNumber,
-      shortLabel: "Billing Desk"
-    };
+  const handleSendOrder = async () => {
+    if (cart.length === 0 || isSubmitting) return;
 
-    if (!activeDesk.number) {
-      alert("WhatsApp number is not configured.");
-      return;
+    setIsSubmitting(true);
+
+    try {
+      // 1. Create order in Live Kitchen Slip store
+      const order = await createOrder({
+        diningMode,
+        tableNumber: diningMode === 'dine-in' ? tableNumber : '',
+        items: cart,
+        totalCount,
+        totalAmount,
+        notes
+      });
+
+      setPlacedOrder(order);
+
+      // 2. Open WhatsApp for customer & cafe verification
+      if (isWhatsappConfigured && cafeConfig.whatsappNumber) {
+        const encodedMsg = getWhatsAppMessage(`Order: #${order.id}\n${notes}`);
+        const url = `https://wa.me/${cafeConfig.whatsappNumber}?text=${encodedMsg}`;
+        window.open(url, '_blank');
+      }
+
+      // 3. Clear cart after successful placement
+      clearCart();
+    } catch (err) {
+      console.error("Order creation failed:", err);
+    } finally {
+      setIsSubmitting(false);
     }
-
-    const encodedMsg = getWhatsAppMessage(notes);
-    const url = `https://wa.me/${activeDesk.number}?text=${encodedMsg}`;
-    window.open(url, '_blank');
   };
 
   return (
@@ -116,9 +138,79 @@ export default function WhatsAppCartDrawer() {
                 </button>
               </div>
 
-              {/* Items List */}
+              {/* Items List / Placed Order View */}
               <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
-                {cart.length === 0 ? (
+                {placedOrder ? (
+                  /* Order Success Screen */
+                  <div className="text-center py-6 space-y-4">
+                    <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
+                      <CheckCircle2 className="w-8 h-8" />
+                    </div>
+
+                    <div>
+                      <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                        Order Received!
+                      </span>
+                      <h3 className="font-serif text-2xl font-bold text-forest-950 mt-2">
+                        Slip Sent to Kitchen
+                      </h3>
+                      <p className="text-xs text-gray-500 mt-1">
+                        Our chefs at Divine Café have received your order.
+                      </p>
+                    </div>
+
+                    <div className="p-4 bg-cream-100/80 rounded-2xl border border-cream-200 text-left space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-cream-200/80 pb-2">
+                        <span className="text-xs text-gray-500">Order ID:</span>
+                        <span className="font-mono font-bold text-forest-900 text-sm">#{placedOrder.id}</span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-cream-200/80 pb-2">
+                        <span className="text-xs text-gray-500">Service:</span>
+                        <span className="font-semibold text-forest-950 text-xs">
+                          {placedOrder.diningMode === 'takeaway' ? '🛍️ Takeaway' : `🍽️ Dine-In ${placedOrder.tableNumber ? `(Table #${placedOrder.tableNumber})` : ''}`}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-cream-200/80 pb-2">
+                        <span className="text-xs text-gray-500">Items:</span>
+                        <span className="text-xs font-medium text-forest-900">{placedOrder.totalCount} item{placedOrder.totalCount !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-0.5">
+                        <span className="text-xs font-bold text-forest-950">Total Amount:</span>
+                        <span className="font-serif font-bold text-base text-forest-950">₹{placedOrder.totalAmount}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-center gap-1.5 text-xs text-olive-700 bg-olive-50 p-2.5 rounded-xl border border-olive-200">
+                      <Clock className="w-3.5 h-3.5" />
+                      <span>Estimated Prep Time: 15–20 minutes</span>
+                    </div>
+
+                    <div className="pt-2 space-y-2">
+                      {isWhatsappConfigured && cafeConfig.whatsappNumber && (
+                        <button
+                          onClick={() => {
+                            const encodedMsg = getWhatsAppMessage(`Order: #${placedOrder.id}\n${notes}`);
+                            window.open(`https://wa.me/${cafeConfig.whatsappNumber}?text=${encodedMsg}`, '_blank');
+                          }}
+                          className="w-full py-3 px-4 rounded-full bg-[#1b4931] hover:bg-[#143826] text-cream-100 font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
+                        >
+                          <Send className="w-3.5 h-3.5 text-olive-300" />
+                          <span>View / Message via WhatsApp</span>
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => {
+                          setPlacedOrder(null);
+                          setIsDrawerOpen(false);
+                        }}
+                        className="w-full py-2.5 px-4 rounded-full bg-cream-200/70 hover:bg-cream-200 text-forest-950 font-semibold text-xs transition-all"
+                      >
+                        Order More Dishes / Return
+                      </button>
+                    </div>
+                  </div>
+                ) : cart.length === 0 ? (
                   <div className="text-center py-16 space-y-3">
                     <div className="w-14 h-14 rounded-full bg-cream-100 text-forest-800 flex items-center justify-center mx-auto">
                       <ShoppingBag className="w-6 h-6 text-gray-400" />
@@ -249,7 +341,7 @@ export default function WhatsAppCartDrawer() {
               </div>
 
               {/* Drawer Footer */}
-              {cart.length > 0 && (
+              {!placedOrder && cart.length > 0 && (
                 <div className="p-4 sm:p-6 bg-cream-50 border-t border-cream-200 space-y-3.5">
                   <div className="flex items-center justify-between">
                     <div>
@@ -262,15 +354,16 @@ export default function WhatsAppCartDrawer() {
                   </div>
 
                   <button
-                    onClick={() => handleSendOrder('primary')}
-                    className="w-full py-3.5 px-6 rounded-full bg-[#143826] hover:bg-[#0f2b1d] text-cream-100 font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
+                    onClick={handleSendOrder}
+                    disabled={isSubmitting}
+                    className="w-full py-3.5 px-6 rounded-full bg-[#143826] hover:bg-[#0f2b1d] disabled:opacity-50 text-cream-100 font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
                   >
                     <Send className="w-4 h-4 text-olive-300" />
-                    <span>Send Order via WhatsApp</span>
+                    <span>{isSubmitting ? 'Placing Order...' : 'Place Order & Send Slip to Kitchen'}</span>
                   </button>
 
                   <p className="text-[10px] text-center text-gray-400">
-                    Opens WhatsApp with your pre-formatted order details for verification and slip cutting.
+                    Sends your digital slip instantly to the billing desk & kitchen for immediate preparation.
                   </p>
                 </div>
               )}

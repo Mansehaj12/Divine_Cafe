@@ -62,6 +62,16 @@ export const cafeConfig = {
     directionsUrl: "https://www.google.com/maps/dir//DIVINE+ORGANICS,+Mall+Rd,+inside+Baradari+Garden,+opposite+PEER+BABA+JI+DARGAH,+Lahori+Gate,+Patiala,+Punjab+147001/@30.3335748,76.4000812,17z"
   },
 
+  // Kitchen & Counter Live Orders Dashboard
+  kitchen: {
+    pin: "1470", // 4-digit PIN for Owner / Staff login to view live slips
+    autoSoundAlert: true,
+    // Optional: Firebase Realtime Database URL for multi-device cloud sync
+    // e.g. "https://your-cafe-orders-default-rtdb.firebaseio.com"
+    firebaseDbUrl: "",
+    soundEnabledDefault: true
+  },
+
   // Operating Hours (Kept uninvented / placeholder until provided)
   isHoursProvided: false,
   hours: {
