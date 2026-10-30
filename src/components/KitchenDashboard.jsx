@@ -29,6 +29,21 @@ import {
 } from '../services/orderService';
 import { cafeConfig } from '../data/cafeConfig';
 
+// Deep comparison helper to prevent unnecessary re-renders & UI flickering
+function areOrdersEqual(prevList, nextList) {
+  if (prevList === nextList) return true;
+  if (!prevList || !nextList) return false;
+  if (prevList.length !== nextList.length) return false;
+  for (let i = 0; i < prevList.length; i++) {
+    const a = prevList[i];
+    const b = nextList[i];
+    if (a.id !== b.id || a.status !== b.status || a.totalAmount !== b.totalAmount) {
+      return false;
+    }
+  }
+  return true;
+}
+
 export default function KitchenDashboard({ onBackToWebsite }) {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return sessionStorage.getItem('divine_kitchen_auth') === 'true';
@@ -47,57 +62,57 @@ export default function KitchenDashboard({ onBackToWebsite }) {
   const [printingOrderId, setPrintingOrderId] = useState(null);
   const [printingTableKey, setPrintingTableKey] = useState(null);
 
-  const prevOrderCountRef = useRef(0);
-
   // Live clock
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
   }, []);
 
+  // Stable updater to eliminate UI flicker
+  const applyOrdersUpdate = (incoming) => {
+    if (!Array.isArray(incoming)) return;
+    setOrders((prev) => {
+      if (areOrdersEqual(prev, incoming)) {
+        return prev; // Prevents unnecessary re-render and flickering!
+      }
+      // Play bell if new order arrived
+      if (incoming.length > prev.length && soundEnabled) {
+        playOrderBell();
+      }
+      return incoming;
+    });
+  };
+
   // Load and subscribe to live orders
   useEffect(() => {
     if (!isAuthenticated) return;
 
-    // Initial load
+    // 1. Initial load from local cache
     const initial = getLocalOrders();
-    setOrders(initial);
-    prevOrderCountRef.current = initial.length;
+    applyOrdersUpdate(initial);
 
-    // Server & Cloud sync on startup
+    // 2. Initial cloud fetch
     syncFromCloud().then(cloudOrders => {
       if (Array.isArray(cloudOrders)) {
-        if (cloudOrders.length > prevOrderCountRef.current) {
-          if (soundEnabled) playOrderBell();
-        }
-        prevOrderCountRef.current = cloudOrders.length;
-        setOrders(cloudOrders);
+        applyOrdersUpdate(cloudOrders);
       }
     });
 
-    // Real-time listener (same window + other tabs)
+    // 3. Real-time listener (SSE Stream + multi-tab events)
     const unsubscribe = subscribeToOrders((updatedOrders) => {
       if (Array.isArray(updatedOrders)) {
-        if (updatedOrders.length > prevOrderCountRef.current) {
-          if (soundEnabled) playOrderBell();
-        }
-        prevOrderCountRef.current = updatedOrders.length;
-        setOrders(updatedOrders);
+        applyOrdersUpdate(updatedOrders);
       }
     });
 
-    // Fast polling every 2 seconds for multi-device sync (phone to PC)
+    // 4. Stable periodic background heartbeat sync (every 12 seconds)
     const pollInterval = setInterval(() => {
       syncFromCloud().then(cloudOrders => {
         if (Array.isArray(cloudOrders)) {
-          if (cloudOrders.length > prevOrderCountRef.current) {
-            if (soundEnabled) playOrderBell();
-          }
-          prevOrderCountRef.current = cloudOrders.length;
-          setOrders(cloudOrders);
+          applyOrdersUpdate(cloudOrders);
         }
       });
-    }, 2000);
+    }, 12000);
 
     return () => {
       unsubscribe();
