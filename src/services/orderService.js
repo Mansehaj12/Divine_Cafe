@@ -160,7 +160,8 @@ export async function createOrder(orderData) {
     year: 'numeric'
   });
 
-  const orderId = `DC-${Math.floor(1000 + Math.random() * 9000)}`;
+  // Collision-proof order ID (time milliseconds + random 2-digit salt)
+  const orderId = `DC-${Date.now().toString().slice(-4)}${Math.floor(10 + Math.random() * 90)}`;
 
   const newOrder = {
     id: orderId,
