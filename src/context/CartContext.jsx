@@ -16,13 +16,11 @@ export function CartProvider({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   // Table & Dining Mode State
-  // Supports URL query param (?table=4) or localStorage persistence
   const [tableNumber, setTableNumber] = useState(() => {
     try {
       const params = new URLSearchParams(window.location.search);
       const urlTable = params.get('table');
       if (urlTable) {
-        // Sanitize: allow only positive integers 1-99
         const parsed = parseInt(urlTable, 10);
         if (!isNaN(parsed) && parsed > 0 && parsed <= 99) {
           localStorage.setItem('divine_cafe_table', String(parsed));
@@ -35,16 +33,32 @@ export function CartProvider({ children }) {
     }
   });
 
-  // Dining Mode: 'dine-in' (if tableNumber is set) or 'takeaway'
   const [diningMode, setDiningMode] = useState(() => {
     try {
       const saved = localStorage.getItem('divine_cafe_dining_mode');
       if (saved === 'takeaway') return 'takeaway';
-      return localStorage.getItem('divine_cafe_table') ? 'dine-in' : 'dine-in';
+      return 'dine-in';
     } catch {
       return 'dine-in';
     }
   });
+
+  // Watch URL changes so changing ?table=7 in browser address bar immediately updates state
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const urlTable = params.get('table');
+      if (urlTable) {
+        const parsed = parseInt(urlTable, 10);
+        if (!isNaN(parsed) && parsed > 0 && parsed <= 99) {
+          setTableNumber(String(parsed));
+          setDiningMode('dine-in');
+          localStorage.setItem('divine_cafe_table', String(parsed));
+          localStorage.setItem('divine_cafe_dining_mode', 'dine-in');
+        }
+      }
+    } catch {}
+  }, []);
 
   useEffect(() => {
     try {
@@ -161,7 +175,6 @@ export function CartProvider({ children }) {
     msg += `\n*Total Amount:* ₹${totalAmount}\n`;
     
     if (customerNotes && customerNotes.trim()) {
-      // Sanitize notes: strip dangerous characters or excessive whitespace
       const sanitized = customerNotes.trim().replace(/[\r\n]{3,}/g, '\n\n').slice(0, 300);
       msg += `*Special Instructions:* ${sanitized}\n`;
     }
@@ -199,4 +212,3 @@ export function useCart() {
   }
   return context;
 }
-
