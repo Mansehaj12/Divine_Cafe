@@ -1,11 +1,15 @@
 /**
  * Divine Cafe - Realtime Order Service
- * Handles live KOT slips, multi-device synchronization, audio bells, and status tracking.
+ * Handles live KOT slips, multi-device synchronization across phones/PCs, audio bells, and status tracking.
  */
 import { cafeConfig } from '../data/cafeConfig';
 
 const LOCAL_STORAGE_KEY = 'divine_cafe_orders_v1';
 const CHANNEL_NAME = 'divine_orders_channel';
+
+// Unique global cloud topic for Divine Cafe Patiala (allows real-time cross-device sync on mobile 4G/5G/Wi-Fi)
+const CLOUD_TOPIC = 'divine_cafe_patiala_kot_live_v1';
+const CLOUD_ENDPOINT = `https://ntfy.sh/${CLOUD_TOPIC}`;
 
 // Browser-safe broadcast channel
 const channel = typeof window !== 'undefined' && 'BroadcastChannel' in window
@@ -84,7 +88,7 @@ function saveOrdersLocally(orders) {
 }
 
 /**
- * Create a new order (from customer checkout)
+ * Create a new order (from customer checkout on phone or PC)
  */
 export async function createOrder(orderData) {
   const timestamp = Date.now();
@@ -119,36 +123,32 @@ export async function createOrder(orderData) {
     source: 'Website QR / Online'
   };
 
-  // 1. Save locally and dispatch
+  // 1. Save locally and dispatch immediately
   const currentOrders = getLocalOrders();
   const updatedOrders = [newOrder, ...currentOrders.filter(o => o.id !== newOrder.id)];
   saveOrdersLocally(updatedOrders);
 
-  // 2. Sync to local server API (for multi-device / phone-to-PC sync)
+  // 2. Publish to Live Cloud Relay (Instant cross-device delivery over 4G/5G/Wi-Fi)
   try {
-    await fetch('/api/orders', {
+    fetch(CLOUD_ENDPOINT, {
+      method: 'POST',
+      headers: {
+        'Title': `New Order #${newOrder.id} (${newOrder.diningMode === 'takeaway' ? 'Takeaway' : `Table #${newOrder.tableNumber}`})`,
+        'Tags': 'bell,plate',
+        'Priority': 'urgent'
+      },
+      body: JSON.stringify(newOrder)
+    }).catch(() => {});
+  } catch {}
+
+  // 3. Sync to local dev server API if available
+  try {
+    fetch('/api/orders', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(newOrder)
-    });
-  } catch {
-    // Local server offline or in static preview, local storage remains intact
-  }
-
-  // 3. Sync to Firebase Cloud DB if configured
-  const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
-  if (cloudUrl && cloudUrl.startsWith('http')) {
-    try {
-      const endpoint = cloudUrl.replace(/\/$/, '') + `/orders/${newOrder.id}.json`;
-      await fetch(endpoint, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newOrder)
-      });
-    } catch (cloudErr) {
-      console.warn("Could not sync order to cloud DB:", cloudErr);
-    }
-  }
+    }).catch(() => {});
+  } catch {}
 
   return newOrder;
 }
@@ -167,29 +167,23 @@ export async function updateOrderStatus(orderId, newStatus) {
 
   saveOrdersLocally(updated);
 
+  // Broadcast status update to Cloud Relay
+  try {
+    fetch(CLOUD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Title': `Status: Order #${orderId} -> ${newStatus}` },
+      body: JSON.stringify({ type: 'STATUS_UPDATE', id: orderId, status: newStatus, timestamp: Date.now() })
+    }).catch(() => {});
+  } catch {}
+
   // Sync to local server API
   try {
-    await fetch('/api/orders', {
+    fetch('/api/orders', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id: orderId, status: newStatus })
-    });
+    }).catch(() => {});
   } catch {}
-
-  // Sync to Cloud DB
-  const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
-  if (cloudUrl && cloudUrl.startsWith('http')) {
-    try {
-      const endpoint = cloudUrl.replace(/\/$/, '') + `/orders/${orderId}/status.json`;
-      await fetch(endpoint, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newStatus)
-      });
-    } catch (err) {
-      console.warn("Could not update cloud order status:", err);
-    }
-  }
 
   return updated;
 }
@@ -205,52 +199,68 @@ export function clearCompletedOrders() {
 }
 
 /**
- * Fetch orders from local server API or cloud DB
+ * Fetch and reconstruct all orders from Cloud Relay and local storage
  */
 export async function syncFromCloud() {
-  // First try local server /api/orders
+  const localOrders = getLocalOrders();
+  const ordersMap = new Map();
+  localOrders.forEach(o => ordersMap.set(o.id, o));
+
+  // 1. Fetch from Cloud Relay (Last 12 hours history)
   try {
-    const res = await fetch('/api/orders');
+    const res = await fetch(`${CLOUD_ENDPOINT}/json?poll=1&since=12h`);
     if (res.ok) {
-      const serverOrders = await res.json();
-      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
-        // Merge with local orders without duplicates
-        const local = getLocalOrders();
-        const map = new Map();
-        [...serverOrders, ...local].forEach(o => map.set(o.id, o));
-        const merged = Array.from(map.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-        saveOrdersLocally(merged);
-        return merged;
+      const text = await res.text();
+      text.trim().split('\n').forEach(line => {
+        try {
+          const msg = JSON.parse(line);
+          if (msg.event === 'message') {
+            const data = JSON.parse(msg.message);
+            if (data.type === 'STATUS_UPDATE' && data.id) {
+              if (ordersMap.has(data.id)) {
+                ordersMap.get(data.id).status = data.status;
+              }
+            } else if (data.id && data.items) {
+              // Only overwrite if existing doesn't have a newer status
+              const existing = ordersMap.get(data.id);
+              if (existing) {
+                ordersMap.set(data.id, { ...data, status: existing.status || data.status });
+              } else {
+                ordersMap.set(data.id, data);
+              }
+            }
+          }
+        } catch {}
+      });
+    }
+  } catch (err) {
+    console.warn("Could not poll cloud relay:", err);
+  }
+
+  // 2. Also check local server /api/orders if running
+  try {
+    const localApiRes = await fetch('/api/orders');
+    if (localApiRes.ok) {
+      const serverOrders = await localApiRes.json();
+      if (Array.isArray(serverOrders)) {
+        serverOrders.forEach(o => {
+          if (!ordersMap.has(o.id)) ordersMap.set(o.id, o);
+        });
       }
     }
   } catch {}
 
-  // Then try Firebase Cloud DB if configured
-  const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
-  if (cloudUrl && cloudUrl.startsWith('http')) {
-    try {
-      const endpoint = cloudUrl.replace(/\/$/, '') + '/orders.json';
-      const res = await fetch(endpoint);
-      if (res.ok) {
-        const data = await res.json();
-        if (data) {
-          const cloudOrders = Object.values(data).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-          saveOrdersLocally(cloudOrders);
-          return cloudOrders;
-        }
-      }
-    } catch (err) {
-      console.warn("Failed to sync from cloud:", err);
-    }
-  }
-
-  return getLocalOrders();
+  const merged = Array.from(ordersMap.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+  saveOrdersLocally(merged);
+  return merged;
 }
 
 /**
- * Subscribe to realtime updates across browser tabs, storage, and server
+ * Subscribe to realtime updates across mobile phones, tabs, and computers via SSE
  */
 export function subscribeToOrders(callback) {
+  let eventSource = null;
+
   // 1. Same-window custom event
   const handleCustom = (e) => {
     callback(e.detail || getLocalOrders());
@@ -279,6 +289,38 @@ export function subscribeToOrders(callback) {
     channel.addEventListener('message', handleChannel);
   }
 
+  // 4. Live Server-Sent Events (SSE) from Cloud Relay (instant mobile to computer)
+  try {
+    if (typeof window !== 'undefined' && 'EventSource' in window) {
+      eventSource = new EventSource(`${CLOUD_ENDPOINT}/sse`);
+      eventSource.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.event === 'message') {
+            const data = JSON.parse(msg.message);
+            const current = getLocalOrders();
+            let updated = [...current];
+
+            if (data.type === 'STATUS_UPDATE') {
+              updated = current.map(o => o.id === data.id ? { ...o, status: data.status } : o);
+            } else if (data.id && data.items) {
+              if (!current.some(o => o.id === data.id)) {
+                updated = [data, ...current];
+              }
+            }
+
+            saveOrdersLocally(updated);
+            callback(updated);
+          }
+        } catch (e) {
+          console.warn("Error processing live SSE event:", e);
+        }
+      };
+    }
+  } catch (err) {
+    console.warn("Could not connect live SSE stream:", err);
+  }
+
   return () => {
     if (typeof window !== 'undefined') {
       window.removeEventListener('divine_orders_changed', handleCustom);
@@ -286,6 +328,9 @@ export function subscribeToOrders(callback) {
     }
     if (channel) {
       channel.removeEventListener('message', handleChannel);
+    }
+    if (eventSource) {
+      eventSource.close();
     }
   };
 }
