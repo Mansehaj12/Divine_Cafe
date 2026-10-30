@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { X, Trash2, Plus, Minus, Send, ShoppingBag, ArrowRight } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cafeConfig } from '../data/cafeConfig';
@@ -21,6 +21,18 @@ export default function WhatsAppCartDrawer() {
   const [notes, setNotes] = useState('');
   const [selectedDesk, setSelectedDesk] = useState('primary');
   const isWhatsappConfigured = cafeConfig.isWhatsappProvided;
+
+  // Prevent background menu scrolling when drawer is open
+  useEffect(() => {
+    if (isDrawerOpen) {
+      const originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+
+      return () => {
+        document.body.style.overflow = originalOverflow;
+      };
+    }
+  }, [isDrawerOpen]);
 
   const handleSendOrder = (deskKey = selectedDesk) => {
     const activeDesk = cafeConfig.desks?.[deskKey] || {
@@ -72,14 +84,14 @@ export default function WhatsAppCartDrawer() {
 
       {/* Slide-over Drawer Overlay */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden">
+        <div className="fixed inset-0 z-50 overflow-hidden overscroll-none">
           <div
             className="absolute inset-0 bg-forest-950/70 backdrop-blur-sm transition-opacity"
             onClick={() => setIsDrawerOpen(false)}
           />
 
           <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
-            <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
+            <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between h-full overscroll-contain">
               
               {/* Drawer Header */}
               <div className="p-5 sm:p-6 bg-[#143826] text-cream-100 flex items-center justify-between border-b border-forest-800">
@@ -106,7 +118,7 @@ export default function WhatsAppCartDrawer() {
               </div>
 
               {/* Items List */}
-              <div className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-4">
+              <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
                 {cart.length === 0 ? (
                   <div className="text-center py-16 space-y-3">
                     <div className="w-14 h-14 rounded-full bg-cream-100 text-forest-800 flex items-center justify-center mx-auto">
