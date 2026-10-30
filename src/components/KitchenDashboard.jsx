@@ -274,9 +274,6 @@ export default function KitchenDashboard({ onBackToWebsite }) {
                 autoFocus
                 className="w-full text-center text-2xl tracking-[0.5em] py-3 rounded-2xl bg-[#0e2117] border border-forest-700 text-white placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-olive-400 font-mono"
               />
-              <p className="text-[11px] text-cream-200/50 mt-1.5">
-                Default Staff PIN: <span className="font-mono text-olive-300 font-bold">1470</span>
-              </p>
             </div>
 
             {pinError && (
