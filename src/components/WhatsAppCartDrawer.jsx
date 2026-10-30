@@ -19,7 +19,6 @@ export default function WhatsAppCartDrawer() {
   } = useCart();
 
   const [notes, setNotes] = useState('');
-  const [selectedDesk, setSelectedDesk] = useState('primary');
   const isWhatsappConfigured = cafeConfig.isWhatsappProvided;
 
   // Prevent background menu scrolling when drawer is open
@@ -262,68 +261,12 @@ export default function WhatsAppCartDrawer() {
                     </div>
                   </div>
 
-                  {/* Dual Desk Selector for Slip Cutting */}
-                  <div className="space-y-1.5 bg-white p-2.5 rounded-2xl border border-cream-200">
-                    <div className="flex items-center justify-between text-[11px]">
-                      <span className="font-bold text-forest-950">Send Slip To:</span>
-                      <span className="text-[10px] text-gray-500">For slip cutting & kitchen KOT</span>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-2">
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDesk('primary')}
-                        className={`p-2 rounded-xl text-left border transition-all ${
-                          selectedDesk === 'primary'
-                            ? 'bg-[#143826] text-white border-[#143826] shadow-xs'
-                            : 'bg-cream-50 text-gray-700 border-cream-200 hover:border-cream-300'
-                        }`}
-                      >
-                        <div className="text-[11px] font-bold flex items-center gap-1">
-                          <span>👤</span> Desk 1 (Owner)
-                        </div>
-                        <div className={`text-[10px] truncate ${selectedDesk === 'primary' ? 'text-olive-200' : 'text-gray-500'}`}>
-                          +91 99889 59413
-                        </div>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setSelectedDesk('secondary')}
-                        className={`p-2 rounded-xl text-left border transition-all ${
-                          selectedDesk === 'secondary'
-                            ? 'bg-[#143826] text-white border-[#143826] shadow-xs'
-                            : 'bg-cream-50 text-gray-700 border-cream-200 hover:border-cream-300'
-                        }`}
-                      >
-                        <div className="text-[11px] font-bold flex items-center gap-1">
-                          <span>🛎️</span> Desk 2 (Counter)
-                        </div>
-                        <div className={`text-[10px] truncate ${selectedDesk === 'secondary' ? 'text-olive-200' : 'text-gray-500'}`}>
-                          +91 98143 77760
-                        </div>
-                      </button>
-                    </div>
-                  </div>
-
                   <button
-                    onClick={() => handleSendOrder(selectedDesk)}
+                    onClick={() => handleSendOrder('primary')}
                     className="w-full py-3.5 px-6 rounded-full bg-[#143826] hover:bg-[#0f2b1d] text-cream-100 font-semibold text-sm transition-all flex items-center justify-center gap-2 shadow-md active:scale-95"
                   >
                     <Send className="w-4 h-4 text-olive-300" />
-                    <span>
-                      Send Order to {selectedDesk === 'primary' ? 'Desk 1 (Owner)' : 'Desk 2 (Counter)'}
-                    </span>
-                  </button>
-
-                  <button
-                    type="button"
-                    onClick={() => handleSendOrder(selectedDesk === 'primary' ? 'secondary' : 'primary')}
-                    className="w-full text-center text-[11px] text-forest-800 hover:text-forest-950 font-medium underline underline-offset-2 py-0.5"
-                  >
-                    {selectedDesk === 'primary'
-                      ? 'Owner away? Click to send directly to Desk 2 (+91 98143 77760)'
-                      : 'Send copy to Desk 1 / Owner (+91 99889 59413)'}
+                    <span>Send Order via WhatsApp</span>
                   </button>
 
                   <p className="text-[10px] text-center text-gray-400">
