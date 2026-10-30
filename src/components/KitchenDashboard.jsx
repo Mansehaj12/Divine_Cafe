@@ -747,15 +747,19 @@ export default function KitchenDashboard({ onBackToWebsite }) {
                           </button>
                         )}
 
-                        {!group.hasPending && !group.allServed && (
-                          <button
-                            onClick={() => handleTableStatusChange(group, 'served')}
-                            className="px-3.5 py-2 rounded-xl bg-emerald-500 hover:bg-emerald-400 text-forest-950 font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
-                          >
-                            <Check className="w-3.5 h-3.5" />
-                            <span>Mark Table Served</span>
-                          </button>
-                        )}
+                        {/* Settle Bill & Free Table Button */}
+                        <button
+                          onClick={() => {
+                            if (window.confirm(`Settle bill of ₹${group.totalAmount} and clear ${group.label} for the next customer?`)) {
+                              handleTableStatusChange(group, 'served');
+                            }
+                          }}
+                          className="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs flex items-center gap-1.5 shadow-sm active:scale-95 transition-all"
+                          title="Settle bill, mark all items served, and free table for next customer"
+                        >
+                          <CheckCircle2 className="w-3.5 h-3.5" />
+                          <span>Settle & Clear Table</span>
+                        </button>
                       </div>
 
                     </div>
