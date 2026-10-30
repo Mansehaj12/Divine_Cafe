@@ -1,8 +1,8 @@
 import React from 'react';
-import { Leaf, Heart, Sparkles, MapPin, Phone, ShieldCheck } from 'lucide-react';
+import { Leaf, Heart, MapPin, Phone } from 'lucide-react';
 import { cafeConfig } from '../data/cafeConfig';
 
-export default function Footer({ onOpenMenuScans, onOpenOwnerNotes, onOpenKitchen }) {
+export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   return (
@@ -65,31 +65,23 @@ export default function Footer({ onOpenMenuScans, onOpenOwnerNotes, onOpenKitche
             </ul>
           </div>
 
-          {/* Menu Categories Summary */}
+          {/* Cafe Experience Column */}
           <div className="lg:col-span-4 space-y-3">
             <h4 className="text-xs uppercase tracking-widest text-white font-semibold">
-              Menu Transparency
+              The Divine Sanctuary
             </h4>
             <p className="text-xs text-cream-300/80 leading-relaxed">
-              Every dish name, description, and price is digitized straight from Divine Cafe's original physical menu.
+              Step into our serene green sanctuary inside Baradari Garden. Every recipe is crafted with mindfulness, pure vegetarian ingredients, and heartfelt care.
             </p>
-            
-            <div className="pt-2 flex flex-col gap-2">
-              <button
-                onClick={onOpenMenuScans}
-                className="inline-flex items-center gap-2 text-xs text-olive-300 hover:text-white transition-colors text-left"
+            <div className="pt-2">
+              <a
+                href={cafeConfig.address.directionsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-xs text-olive-300 hover:text-white transition-colors"
               >
-                <Sparkles className="w-3.5 h-3.5" />
-                <span>View Original Scanned Menu Cards</span>
-              </button>
-
-              <button
-                onClick={onOpenOwnerNotes}
-                className="inline-flex items-center gap-2 text-xs text-olive-300 hover:text-white transition-colors text-left"
-              >
-                <ShieldCheck className="w-3.5 h-3.5" />
-                <span>Menu Accuracy & Owner Clarifications</span>
-              </button>
+                <span>📍 Get Directions on Google Maps →</span>
+              </a>
             </div>
           </div>
 

@@ -4,7 +4,6 @@ import { menuCategories, menuItems } from '../data/menuData';
 import MenuItemCard from './MenuItemCard';
 
 export default function DigitalMenu({ 
-  onOpenMenuScans,
   activeCategory: controlledActiveCategory,
   onSelectCategory: setControlledActiveCategory
 }) {
@@ -44,17 +43,6 @@ export default function DigitalMenu({
           <p className="mt-3 text-sm sm:text-base text-gray-600 leading-relaxed font-light">
             Sourced directly from our authentic kitchen menu cards. Handcrafted dough, fresh ingredients, and pure vegetarian recipes.
           </p>
-
-          {/* Quick Action: Original Menu Scans Modal Trigger */}
-          <div className="mt-4 flex items-center justify-center gap-3">
-            <button
-              onClick={onOpenMenuScans}
-              className="inline-flex items-center gap-2 text-xs font-medium text-forest-700 hover:text-forest-900 bg-white px-4 py-2 rounded-full border border-cream-300 shadow-sm transition-all hover:shadow"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-olive-600" />
-              <span>View Original Scanned Menu Cards</span>
-            </button>
-          </div>
         </div>
 
         {/* Search Bar only - NO horizontal category buttons as requested */}

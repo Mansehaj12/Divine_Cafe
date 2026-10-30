@@ -3,7 +3,7 @@ import { Menu, X, ShoppingBag, MapPin, Sparkles, Phone, Leaf } from 'lucide-reac
 import { cafeConfig } from '../data/cafeConfig';
 import { useCart } from '../context/CartContext';
 
-export default function Navbar({ onOpenMenuScans, onOpenOwnerNotes }) {
+export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { totalCount, setIsDrawerOpen } = useCart();
@@ -84,16 +84,6 @@ export default function Navbar({ onOpenMenuScans, onOpenOwnerNotes }) {
                 )}
               </button>
 
-              {/* Physical Menu Cards Button */}
-              <button
-                onClick={onOpenMenuScans}
-                className="hidden lg:flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-full bg-cream-100/10 hover:bg-cream-100/20 text-cream-200 border border-white/10 transition-colors"
-                title="View original printed menu cards"
-              >
-                <Sparkles className="w-3.5 h-3.5 text-olive-300" />
-                <span>Original Menu</span>
-              </button>
-
               {/* Mobile Hamburger Button */}
               <button
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -129,17 +119,6 @@ export default function Navbar({ onOpenMenuScans, onOpenOwnerNotes }) {
           </div>
 
           <div className="flex flex-col gap-3 pt-6 border-t border-forest-800">
-            <button
-              onClick={() => {
-                setMobileMenuOpen(false);
-                onOpenMenuScans();
-              }}
-              className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-forest-800 text-cream-100 text-sm font-medium border border-forest-700"
-            >
-              <Sparkles className="w-4 h-4 text-olive-300" />
-              <span>View Original Printed Menu Scans</span>
-            </button>
-
             <a
               href="#menu"
               onClick={handleLinkClick}
