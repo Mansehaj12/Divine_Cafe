@@ -7,24 +7,30 @@ export default function ContactWhatsApp() {
   const { cart, totalCount, totalAmount, getWhatsAppMessage, setIsDrawerOpen } = useCart();
   const [customerName, setCustomerName] = useState("");
   const [customerNote, setCustomerNote] = useState("");
+  const [targetDesk, setTargetDesk] = useState("primary");
   const [submitted, setSubmitted] = useState(false);
 
-  const isConfigured = cafeConfig.isWhatsappProvided && cafeConfig.whatsappNumber;
+  const isConfigured = cafeConfig.isWhatsappProvided;
 
   const handleSendEnquiry = (e) => {
     e.preventDefault();
 
     if (!isConfigured) {
-      alert("WhatsApp number is currently set to placeholder in 'cafeConfig.js'. Please configure the owner's WhatsApp number to enable direct instant redirection.");
+      alert("WhatsApp number is not configured.");
       return;
     }
+
+    const desk = cafeConfig.desks?.[targetDesk] || {
+      number: cafeConfig.whatsappNumber,
+      label: "Billing Desk"
+    };
 
     let messageText = `Hi Divine Cafe! I am visiting your website.\n\n*Name:* ${customerName || 'Guest'}\n*Enquiry:* ${customerNote || 'General enquiry'}`;
     if (cart.length > 0) {
       messageText = decodeURIComponent(getWhatsAppMessage(`Customer: ${customerName}\n${customerNote}`));
     }
 
-    const whatsappUrl = `https://wa.me/${cafeConfig.whatsappNumber}?text=${encodeURIComponent(messageText)}`;
+    const whatsappUrl = `https://wa.me/${desk.number}?text=${encodeURIComponent(messageText)}`;
     window.open(whatsappUrl, '_blank');
     setSubmitted(true);
     setTimeout(() => setSubmitted(false), 3000);
@@ -145,6 +151,42 @@ export default function ContactWhatsApp() {
                   }
                   className="w-full px-4 py-2.5 rounded-xl bg-cream-50 border border-cream-300 text-sm focus:outline-none focus:ring-2 focus:ring-forest-600/40 text-forest-950 resize-none"
                 ></textarea>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold uppercase tracking-wider text-forest-800 mb-1.5">
+                  Send Enquiry / Order To
+                </label>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setTargetDesk('primary')}
+                    className={`p-2.5 rounded-xl text-left border transition-all ${
+                      targetDesk === 'primary'
+                        ? 'bg-[#143826] text-white border-[#143826]'
+                        : 'bg-cream-50 text-gray-700 border-cream-300 hover:border-forest-600'
+                    }`}
+                  >
+                    <div className="text-xs font-bold">👤 Desk 1 (Owner)</div>
+                    <div className={`text-[10px] ${targetDesk === 'primary' ? 'text-olive-200' : 'text-gray-500'}`}>
+                      +91 99889 59413
+                    </div>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setTargetDesk('secondary')}
+                    className={`p-2.5 rounded-xl text-left border transition-all ${
+                      targetDesk === 'secondary'
+                        ? 'bg-[#143826] text-white border-[#143826]'
+                        : 'bg-cream-50 text-gray-700 border-cream-300 hover:border-forest-600'
+                    }`}
+                  >
+                    <div className="text-xs font-bold">🛎️ Desk 2 (Counter)</div>
+                    <div className={`text-[10px] ${targetDesk === 'secondary' ? 'text-olive-200' : 'text-gray-500'}`}>
+                      +91 98143 77760
+                    </div>
+                  </button>
+                </div>
               </div>
 
               {/* Order Bag attachment reminder */}

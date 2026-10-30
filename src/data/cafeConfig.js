@@ -15,14 +15,34 @@ export const cafeConfig = {
   heroDescription: "Step into our serene, cozy green sanctuary where every recipe is crafted with mindfulness, pure vegetarian ingredients, and heartfelt care. Handcrafted thin-crust pizzas, comforting brews, gourmet sandwiches, and refreshing coolers await you.",
 
   // Contact & WhatsApp Ordering
-  // Set isWhatsappProvided to true when you enter the actual 10 or 12 digit WhatsApp phone number (with country code e.g. "919876543210")
-  isWhatsappProvided: false,
-  whatsappNumber: "", // Owner can input e.g. "91XXXXXXXXXX"
-  whatsappPlaceholderNote: "WhatsApp ordering will be connected once the phone number is provided.",
+  // Dual-number setup: Owner / Billing Desk (slips) & Alternate Counter Desk
+  isWhatsappProvided: true,
+  whatsappNumber: "919988959413", // Default primary
   
+  // Dual Numbers for Slip Cutting & Kitchen Orders
+  desks: {
+    primary: {
+      id: "primary",
+      label: "Owner / Billing Desk",
+      shortLabel: "Desk 1 (Owner)",
+      number: "919988959413",
+      display: "+91 99889 59413",
+      description: "Direct slip cutting & main billing"
+    },
+    secondary: {
+      id: "secondary",
+      label: "Counter / Alternate Desk",
+      shortLabel: "Desk 2 (Counter)",
+      number: "919814377760",
+      display: "+91 98143 77760",
+      description: "In case Owner is away from office"
+    }
+  },
+
   // Phone / Calling
-  isPhoneProvided: false,
-  phoneNumber: "", // e.g. "+91 98765 43210"
+  isPhoneProvided: true,
+  phoneNumber: "+91 99889 59413",
+  secondaryPhoneNumber: "+91 98143 77760",
 
   // Address & Google Maps
   isAddressProvided: true,

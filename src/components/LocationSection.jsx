@@ -97,15 +97,28 @@ export default function LocationSection() {
                 </div>
                 <div>
                   <h4 className="text-xs uppercase tracking-wider text-gray-400 font-semibold">
-                    Direct Contact
+                    Direct Contact / Orders
                   </h4>
                   {cafeConfig.isPhoneProvided ? (
-                    <a
-                      href={`tel:${cafeConfig.phoneNumber}`}
-                      className="text-sm text-forest-900 hover:text-forest-700 font-medium mt-1 block"
-                    >
-                      {cafeConfig.phoneNumber}
-                    </a>
+                    <div className="flex flex-wrap items-center gap-x-2 gap-y-1 mt-1 text-sm text-forest-900 font-medium">
+                      <a
+                        href={`tel:${cafeConfig.phoneNumber}`}
+                        className="hover:text-forest-700 hover:underline"
+                      >
+                        {cafeConfig.phoneNumber}
+                      </a>
+                      {cafeConfig.secondaryPhoneNumber && (
+                        <>
+                          <span className="text-gray-300">•</span>
+                          <a
+                            href={`tel:${cafeConfig.secondaryPhoneNumber}`}
+                            className="hover:text-forest-700 hover:underline"
+                          >
+                            {cafeConfig.secondaryPhoneNumber}
+                          </a>
+                        </>
+                      )}
+                    </div>
                   ) : (
                     <a
                       href="#contact"
