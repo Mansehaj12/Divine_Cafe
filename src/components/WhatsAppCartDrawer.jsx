@@ -53,14 +53,8 @@ export default function WhatsAppCartDrawer() {
         notes
       });
 
+      // 2. Set placed order to show success screen inside drawer
       setPlacedOrder(order);
-
-      // 2. Open WhatsApp for customer & cafe verification
-      if (isWhatsappConfigured && cafeConfig.whatsappNumber) {
-        const encodedMsg = getWhatsAppMessage(`Order: #${order.id}\n${notes}`);
-        const url = `https://wa.me/${cafeConfig.whatsappNumber}?text=${encodedMsg}`;
-        window.open(url, '_blank');
-      }
 
       // 3. Clear cart after successful placement
       clearCart();

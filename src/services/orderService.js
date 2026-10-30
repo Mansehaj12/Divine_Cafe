@@ -14,7 +14,6 @@ const channel = typeof window !== 'undefined' && 'BroadcastChannel' in window
 
 /**
  * Play a realistic two-tone brass service bell using Web Audio API
- * No external MP3 file needed — 100% reliable across all browsers & devices
  */
 export function playOrderBell() {
   try {
@@ -64,13 +63,20 @@ export function getLocalOrders() {
 }
 
 /**
- * Save orders to localStorage and broadcast to other open tabs
+ * Save orders to localStorage, BroadcastChannel, and dispatch custom event
  */
 function saveOrdersLocally(orders) {
   try {
     localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(orders));
+    
+    // Broadcast to other tabs
     if (channel) {
       channel.postMessage({ type: 'ORDERS_UPDATED', orders });
+    }
+
+    // Dispatch event in SAME window
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('divine_orders_changed', { detail: orders }));
     }
   } catch (err) {
     console.error("Failed to save local orders:", err);
@@ -84,7 +90,6 @@ export async function createOrder(orderData) {
   const timestamp = Date.now();
   const dateObj = new Date(timestamp);
   
-  // Format readable time e.g. "01:45 PM"
   const formattedTime = dateObj.toLocaleTimeString('en-IN', {
     hour: '2-digit',
     minute: '2-digit',
@@ -104,7 +109,7 @@ export async function createOrder(orderData) {
     timestamp,
     formattedTime,
     formattedDate,
-    status: 'pending', // 'pending' -> 'preparing' -> 'served' -> 'cancelled'
+    status: 'pending',
     diningMode: orderData.diningMode || 'dine-in',
     tableNumber: orderData.tableNumber || '',
     items: orderData.items || [],
@@ -114,12 +119,23 @@ export async function createOrder(orderData) {
     source: 'Website QR / Online'
   };
 
-  // 1. Save locally
+  // 1. Save locally and dispatch
   const currentOrders = getLocalOrders();
-  const updatedOrders = [newOrder, ...currentOrders];
+  const updatedOrders = [newOrder, ...currentOrders.filter(o => o.id !== newOrder.id)];
   saveOrdersLocally(updatedOrders);
 
-  // 2. Sync to Firebase Cloud DB if configured
+  // 2. Sync to local server API (for multi-device / phone-to-PC sync)
+  try {
+    await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newOrder)
+    });
+  } catch {
+    // Local server offline or in static preview, local storage remains intact
+  }
+
+  // 3. Sync to Firebase Cloud DB if configured
   const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
   if (cloudUrl && cloudUrl.startsWith('http')) {
     try {
@@ -151,6 +167,15 @@ export async function updateOrderStatus(orderId, newStatus) {
 
   saveOrdersLocally(updated);
 
+  // Sync to local server API
+  try {
+    await fetch('/api/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: orderId, status: newStatus })
+    });
+  } catch {}
+
   // Sync to Cloud DB
   const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
   if (cloudUrl && cloudUrl.startsWith('http')) {
@@ -180,51 +205,85 @@ export function clearCompletedOrders() {
 }
 
 /**
- * Fetch orders from cloud DB if configured
+ * Fetch orders from local server API or cloud DB
  */
 export async function syncFromCloud() {
-  const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
-  if (!cloudUrl || !cloudUrl.startsWith('http')) return null;
-
+  // First try local server /api/orders
   try {
-    const endpoint = cloudUrl.replace(/\/$/, '') + '/orders.json';
-    const res = await fetch(endpoint);
-    if (!res.ok) return null;
-    const data = await res.json();
-    if (!data) return [];
+    const res = await fetch('/api/orders');
+    if (res.ok) {
+      const serverOrders = await res.json();
+      if (Array.isArray(serverOrders) && serverOrders.length > 0) {
+        // Merge with local orders without duplicates
+        const local = getLocalOrders();
+        const map = new Map();
+        [...serverOrders, ...local].forEach(o => map.set(o.id, o));
+        const merged = Array.from(map.values()).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+        saveOrdersLocally(merged);
+        return merged;
+      }
+    }
+  } catch {}
 
-    const cloudOrders = Object.values(data).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
-    saveOrdersLocally(cloudOrders);
-    return cloudOrders;
-  } catch (err) {
-    console.warn("Failed to sync from cloud:", err);
-    return null;
+  // Then try Firebase Cloud DB if configured
+  const cloudUrl = cafeConfig.kitchen?.firebaseDbUrl;
+  if (cloudUrl && cloudUrl.startsWith('http')) {
+    try {
+      const endpoint = cloudUrl.replace(/\/$/, '') + '/orders.json';
+      const res = await fetch(endpoint);
+      if (res.ok) {
+        const data = await res.json();
+        if (data) {
+          const cloudOrders = Object.values(data).sort((a, b) => (b.timestamp || 0) - (a.timestamp || 0));
+          saveOrdersLocally(cloudOrders);
+          return cloudOrders;
+        }
+      }
+    } catch (err) {
+      console.warn("Failed to sync from cloud:", err);
+    }
   }
+
+  return getLocalOrders();
 }
 
 /**
- * Subscribe to realtime updates across browser tabs and storage
+ * Subscribe to realtime updates across browser tabs, storage, and server
  */
 export function subscribeToOrders(callback) {
+  // 1. Same-window custom event
+  const handleCustom = (e) => {
+    callback(e.detail || getLocalOrders());
+  };
+
+  // 2. Cross-window storage event
   const handleStorage = (e) => {
     if (e.key === LOCAL_STORAGE_KEY) {
       callback(getLocalOrders());
     }
   };
 
+  // 3. Cross-window BroadcastChannel
   const handleChannel = (e) => {
     if (e.data && e.data.type === 'ORDERS_UPDATED') {
       callback(e.data.orders);
     }
   };
 
-  window.addEventListener('storage', handleStorage);
+  if (typeof window !== 'undefined') {
+    window.addEventListener('divine_orders_changed', handleCustom);
+    window.addEventListener('storage', handleStorage);
+  }
+
   if (channel) {
     channel.addEventListener('message', handleChannel);
   }
 
   return () => {
-    window.removeEventListener('storage', handleStorage);
+    if (typeof window !== 'undefined') {
+      window.removeEventListener('divine_orders_changed', handleCustom);
+      window.removeEventListener('storage', handleStorage);
+    }
     if (channel) {
       channel.removeEventListener('message', handleChannel);
     }

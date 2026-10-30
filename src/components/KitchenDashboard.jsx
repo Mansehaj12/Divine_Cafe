@@ -56,29 +56,40 @@ export default function KitchenDashboard({ onBackToWebsite }) {
     setOrders(initial);
     prevOrderCountRef.current = initial.length;
 
-    // Cloud sync on startup
+    // Server & Cloud sync on startup
     syncFromCloud().then(cloudOrders => {
-      if (cloudOrders) setOrders(cloudOrders);
-    });
-
-    // Real-time listener
-    const unsubscribe = subscribeToOrders((updatedOrders) => {
-      // Check if a new order was added
-      if (updatedOrders.length > prevOrderCountRef.current) {
-        if (soundEnabled) {
-          playOrderBell();
+      if (Array.isArray(cloudOrders)) {
+        if (cloudOrders.length > prevOrderCountRef.current) {
+          if (soundEnabled) playOrderBell();
         }
+        prevOrderCountRef.current = cloudOrders.length;
+        setOrders(cloudOrders);
       }
-      prevOrderCountRef.current = updatedOrders.length;
-      setOrders(updatedOrders);
     });
 
-    // Cloud polling every 5s if cloud URL configured
+    // Real-time listener (same window + other tabs)
+    const unsubscribe = subscribeToOrders((updatedOrders) => {
+      if (Array.isArray(updatedOrders)) {
+        if (updatedOrders.length > prevOrderCountRef.current) {
+          if (soundEnabled) playOrderBell();
+        }
+        prevOrderCountRef.current = updatedOrders.length;
+        setOrders(updatedOrders);
+      }
+    });
+
+    // Fast polling every 2 seconds for multi-device sync (phone to PC)
     const pollInterval = setInterval(() => {
       syncFromCloud().then(cloudOrders => {
-        if (cloudOrders) setOrders(cloudOrders);
+        if (Array.isArray(cloudOrders)) {
+          if (cloudOrders.length > prevOrderCountRef.current) {
+            if (soundEnabled) playOrderBell();
+          }
+          prevOrderCountRef.current = cloudOrders.length;
+          setOrders(cloudOrders);
+        }
       });
-    }, 5000);
+    }, 2000);
 
     return () => {
       unsubscribe();
