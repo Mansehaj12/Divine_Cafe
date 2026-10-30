@@ -1,202 +1,176 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ArrowRight, Plus, Check } from 'lucide-react';
-import { menuItems } from '../data/menuData';
-import { useCart } from '../context/useCart';
+import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
 
 export default function HeroBestsellerTicker() {
-  const { addToCart } = useCart();
-  const [justAddedId, setJustAddedId] = useState(null);
-
-  // Top customer favourite items
   const bestsellers = [
     {
       id: "pz-3",
       name: "Paneer Makhni Pizza",
       tag: "Customer Favorite",
       price: "From ₹240",
-      image: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?auto=format&fit=crop&w=600&q=80",
-      itemRef: menuItems.find(i => i.id === "pz-3")
+      description: "Onion, paneer, rich butter sauce & double cheese",
+      image: "https://images.unsplash.com/photo-1604382355076-af4b0eb60143?auto=format&fit=crop&w=1000&q=85"
     },
     {
       id: "bf-1",
       name: "Mix Veg Poha",
       tag: "Breakfast Special",
       price: "₹120",
-      image: "https://images.unsplash.com/photo-1645177628172-a94c1f96e6db?auto=format&fit=crop&w=600&q=80",
-      itemRef: menuItems.find(i => i.id === "bf-1")
+      description: "Tossed with colorful fresh vegetables & roasted nuts",
+      image: "https://images.unsplash.com/photo-1645177628172-a94c1f96e6db?auto=format&fit=crop&w=1000&q=85"
     },
     {
       id: "mj-5",
       name: "Blue Lagoon Mojito",
-      tag: "Cooler",
+      tag: "Signature Cooler",
       price: "₹120",
-      image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=600&q=80",
-      itemRef: menuItems.find(i => i.id === "mj-5")
+      description: "Vibrant curacao flavor with bubbly citrus soda & lime",
+      image: "https://images.unsplash.com/photo-1551024709-8f23befc6f87?auto=format&fit=crop&w=1000&q=85"
     },
     {
       id: "ps-4",
       name: "Mix Sauce Pasta",
       tag: "Cheesy & Spicy",
       price: "From ₹150",
-      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=600&q=80",
-      itemRef: menuItems.find(i => i.id === "ps-4")
+      description: "Creamy white + tangy red mixed pink sauce",
+      image: "https://images.unsplash.com/photo-1563379091339-03b21ab4a4f8?auto=format&fit=crop&w=1000&q=85"
     },
     {
       id: "bg-2",
       name: "Royal Paneer Burger",
       tag: "Grilled Special",
       price: "₹90",
-      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=600&q=80",
-      itemRef: menuItems.find(i => i.id === "bg-2")
+      description: "Marinated grilled paneer slab with fresh veggies",
+      image: "https://images.unsplash.com/photo-1568901346375-23c9450c58cd?auto=format&fit=crop&w=1000&q=85"
     },
     {
       id: "ch-2",
       name: "Organic Masala Chai",
       tag: "Simmered Spices",
       price: "₹50",
-      image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=600&q=80",
-      itemRef: menuItems.find(i => i.id === "ch-2")
+      description: "Whole spices, fresh ginger & aromatic cardamom",
+      image: "https://images.unsplash.com/photo-1597481499750-3e6b22637e12?auto=format&fit=crop&w=1000&q=85"
     }
   ];
 
-  // Auto carousel index for highlighted item
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // Auto-slide every 3.5 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % bestsellers.length);
-    }, 3200);
+    }, 3500);
     return () => clearInterval(timer);
   }, [bestsellers.length]);
 
-  const activeItem = bestsellers[currentIndex];
-
-  const handleQuickAdd = (e, item) => {
+  const prevSlide = (e) => {
     e.stopPropagation();
-    if (item.itemRef) {
-      addToCart(item.itemRef);
-      setJustAddedId(item.id);
-      setTimeout(() => setJustAddedId(null), 1200);
-    }
+    setCurrentIndex((prev) => (prev === 0 ? bestsellers.length - 1 : prev - 1));
+  };
+
+  const nextSlide = (e) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev + 1) % bestsellers.length);
+  };
+
+  const active = bestsellers[currentIndex];
+
+  const handleScrollToMenu = () => {
+    const el = document.getElementById('menu');
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
   };
 
   return (
-    <div className="w-full my-4 space-y-3">
-      {/* 1. Moving Micro-Card (Spotlight Carousel) */}
+    <div className="w-full my-4">
+      {/* Big Visual Photo Slider (No Quick Add, Large Appetizing Photo) */}
       <div 
-        onClick={() => {
-          const el = document.getElementById('menu');
-          if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }}
-        className="group relative bg-[#122e1f]/90 hover:bg-[#122e1f] backdrop-blur-md rounded-2xl p-3 sm:p-3.5 border border-forest-600/70 shadow-lg cursor-pointer transition-all duration-300 hover:border-olive-400/50 hover:shadow-xl"
+        onClick={handleScrollToMenu}
+        className="group relative w-full h-56 sm:h-64 md:h-72 rounded-3xl overflow-hidden shadow-2xl border-2 border-forest-600/70 cursor-pointer bg-forest-950"
       >
-        <div className="flex items-center gap-3.5">
-          {/* Animated Moving Dish Photo with Glow */}
-          <div className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden bg-forest-950 shrink-0 border border-forest-600 shadow-md">
-            <img
-              key={activeItem.id}
-              src={activeItem.image}
-              alt={activeItem.name}
-              className="w-full h-full object-cover animate-in fade-in zoom-in-95 duration-500"
-            />
-            {/* Pure Veg Badge on Image */}
-            <div className="absolute top-1 left-1 bg-white/95 rounded p-0.5 shadow-xs">
-              <span className="veg-badge scale-75">
-                <span className="veg-dot"></span>
-              </span>
-            </div>
+        {/* Full-bleed Photo with Smooth Cross-fade Animation */}
+        <img
+          key={active.id}
+          src={active.image}
+          alt={active.name}
+          className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-105 animate-in fade-in zoom-in-95 duration-700"
+          loading="eager"
+        />
+
+        {/* Gradient Overlay for Text Readability */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
+
+        {/* Pure Veg Badge Top Left */}
+        <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 z-10">
+          <span className="veg-badge scale-90">
+            <span className="veg-dot"></span>
+          </span>
+          <span className="text-[11px] font-bold text-forest-950 uppercase tracking-wider">
+            Pure Veg
+          </span>
+        </div>
+
+        {/* Bestseller Category Tag Top Right */}
+        <div className="absolute top-3 right-3 bg-forest-900/90 text-olive-300 border border-olive-400/40 backdrop-blur-md px-3 py-1 rounded-full shadow-md flex items-center gap-1.5 text-xs font-bold uppercase tracking-wider z-10">
+          <Sparkles className="w-3.5 h-3.5 text-olive-400" />
+          <span>{active.tag}</span>
+        </div>
+
+        {/* Bottom Dish Information Overlay */}
+        <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10 flex items-end justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md truncate">
+              {active.name}
+            </h3>
+            <p className="text-xs text-cream-200/90 font-light mt-0.5 line-clamp-1 drop-shadow-sm">
+              {active.description}
+            </p>
           </div>
 
-          {/* Dish Information */}
-          <div className="flex-1 min-w-0">
-            <div className="flex items-center gap-2 mb-0.5">
-              <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider text-olive-300 bg-forest-800/80 px-2 py-0.5 rounded-full border border-forest-700">
-                <Sparkles className="w-2.5 h-2.5 text-olive-400 animate-spin" />
-                <span>{activeItem.tag}</span>
-              </span>
-              <span className="text-[10px] text-gray-400 hidden sm:inline">
-                • Tap to view
-              </span>
+          <div className="shrink-0 text-right">
+            <div className="font-serif font-bold text-base sm:text-xl text-olive-300 drop-shadow-md">
+              {active.price}
             </div>
-
-            <h4 className="font-serif text-base sm:text-lg font-bold text-white truncate group-hover:text-cream-200 transition-colors">
-              {activeItem.name}
-            </h4>
-
-            <div className="flex items-center justify-between gap-2 mt-1">
-              <span className="font-serif font-bold text-sm text-olive-300">
-                {activeItem.price}
-              </span>
-
-              {/* 1-Tap Add to Bag */}
-              <button
-                type="button"
-                onClick={(e) => handleQuickAdd(e, activeItem)}
-                className={`py-1 px-3 rounded-lg text-xs font-bold transition-all shadow-sm flex items-center gap-1 ${
-                  justAddedId === activeItem.id
-                    ? 'bg-olive-600 text-white'
-                    : 'bg-cream-100 hover:bg-white text-forest-950 hover:scale-105 active:scale-95'
-                }`}
-              >
-                {justAddedId === activeItem.id ? (
-                  <>
-                    <Check className="w-3 h-3" />
-                    <span>Added</span>
-                  </>
-                ) : (
-                  <>
-                    <Plus className="w-3 h-3" />
-                    <span>Quick Add</span>
-                  </>
-                )}
-              </button>
-            </div>
+            <span className="text-[10px] text-cream-300/80 uppercase tracking-widest block font-medium">
+              View on Menu →
+            </span>
           </div>
         </div>
 
-        {/* Carousel Indicators / Mini Dots */}
-        <div className="flex items-center justify-center gap-1.5 mt-2.5 pt-2 border-t border-forest-800/80">
+        {/* Manual Left/Right Slide Arrows */}
+        <button
+          type="button"
+          onClick={prevSlide}
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 z-20"
+          aria-label="Previous bestseller photo"
+        >
+          <ChevronLeft className="w-5 h-5" />
+        </button>
+        <button
+          type="button"
+          onClick={nextSlide}
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 z-20"
+          aria-label="Next bestseller photo"
+        >
+          <ChevronRight className="w-5 h-5" />
+        </button>
+
+        {/* Slide Progress Dots at Bottom */}
+        <div className="absolute bottom-1.5 left-1/2 -translate-x-1/2 flex items-center gap-1.5 z-20">
           {bestsellers.map((item, idx) => (
             <button
               key={item.id}
+              type="button"
               onClick={(e) => {
                 e.stopPropagation();
                 setCurrentIndex(idx);
               }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
                 currentIndex === idx
-                  ? 'w-6 bg-olive-400'
-                  : 'w-1.5 bg-forest-700 hover:bg-forest-600'
+                  ? 'w-7 bg-olive-400'
+                  : 'w-2 bg-white/40 hover:bg-white/70'
               }`}
-              aria-label={`Go to ${item.name}`}
+              aria-label={`Slide to ${item.name}`}
             />
-          ))}
-        </div>
-      </div>
-
-      {/* 2. Continuous Scrolling Photo Strip below */}
-      <div className="overflow-x-auto no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-        <div className="flex items-center gap-2 min-w-max pb-1">
-          <span className="text-[10px] uppercase font-bold text-olive-300 tracking-wider shrink-0 pr-1">
-            Top Picks:
-          </span>
-          {bestsellers.map((item, idx) => (
-            <button
-              key={item.id}
-              onClick={() => setCurrentIndex(idx)}
-              className={`flex items-center gap-2 px-2.5 py-1 rounded-xl text-xs transition-all border shrink-0 ${
-                currentIndex === idx
-                  ? 'bg-forest-800 text-white border-olive-400/50 shadow-sm'
-                  : 'bg-forest-900/60 text-gray-300 hover:text-white border-forest-800/80 hover:bg-forest-800'
-              }`}
-            >
-              <img
-                src={item.image}
-                alt={item.name}
-                className="w-5 h-5 rounded-md object-cover"
-              />
-              <span className="font-medium text-[11px] truncate max-w-[120px]">{item.name}</span>
-            </button>
           ))}
         </div>
       </div>
