@@ -182,36 +182,6 @@ export default function WhatsAppCartDrawer() {
                         <span className="font-serif font-bold text-base text-forest-950">₹{placedOrder.totalAmount}</span>
                       </div>
                     </div>
-
-                    <div className="flex items-center justify-center gap-1.5 text-xs text-olive-700 bg-olive-50 p-2.5 rounded-xl border border-olive-200">
-                      <Clock className="w-3.5 h-3.5" />
-                      <span>Estimated Prep Time: 15–20 minutes</span>
-                    </div>
-
-                    <div className="pt-2 space-y-2">
-                      {isWhatsappConfigured && cafeConfig.whatsappNumber && (
-                        <button
-                          onClick={() => {
-                            const encodedMsg = getWhatsAppMessage(`Order: #${placedOrder.id}\n${notes}`);
-                            window.open(`https://wa.me/${cafeConfig.whatsappNumber}?text=${encodedMsg}`, '_blank');
-                          }}
-                          className="w-full py-3 px-4 rounded-full bg-[#1b4931] hover:bg-[#143826] text-cream-100 font-semibold text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-95"
-                        >
-                          <Send className="w-3.5 h-3.5 text-olive-300" />
-                          <span>View / Message via WhatsApp</span>
-                        </button>
-                      )}
-
-                      <button
-                        onClick={() => {
-                          setPlacedOrder(null);
-                          setIsDrawerOpen(false);
-                        }}
-                        className="w-full py-2.5 px-4 rounded-full bg-cream-200/70 hover:bg-cream-200 text-forest-950 font-semibold text-xs transition-all"
-                      >
-                        Order More Dishes / Return
-                      </button>
-                    </div>
                   </div>
                 ) : cart.length === 0 ? (
                   <div className="text-center py-16 space-y-3">
