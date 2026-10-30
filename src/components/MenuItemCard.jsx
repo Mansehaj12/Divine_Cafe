@@ -1,14 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, Check } from 'lucide-react';
+import { Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/useCart';
 
 export default function MenuItemCard({ item }) {
-  const { addToCart } = useCart();
+  const { addToCart, cart, updateQuantity } = useCart();
   const hasMultipleSizes = Boolean(item.sizes && item.sizes.length > 1);
   const [selectedSize, setSelectedSize] = useState(
     hasMultipleSizes ? item.sizes[0].label : null
   );
-  const [justAdded, setJustAdded] = useState(false);
   const [imgSrc, setImgSrc] = useState(item.image);
 
   useEffect(() => {
@@ -20,10 +19,14 @@ export default function MenuItemCard({ item }) {
     ? item.sizes.find(s => s.label === selectedSize)?.price || item.sizes[0].price
     : item.price;
 
+  // Active cart key and current quantity for selected size
+  const activeSize = selectedSize || (item.sizes ? item.sizes[0].label : null);
+  const cartKey = `${item.id}-${activeSize || 'standard'}`;
+  const cartItem = cart?.find(ci => ci.cartKey === cartKey);
+  const currentQuantity = cartItem ? cartItem.quantity : 0;
+
   const handleAdd = () => {
     addToCart(item, selectedSize);
-    setJustAdded(true);
-    setTimeout(() => setJustAdded(false), 1200);
   };
 
   return (
@@ -103,30 +106,41 @@ export default function MenuItemCard({ item }) {
           />
         </div>
 
-        {/* Floating Overlapping ADD Button */}
-        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 w-[88px] sm:w-[96px]">
-          <button
-            type="button"
-            onClick={handleAdd}
-            className={`w-full py-1.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md border transition-all active:scale-95 flex items-center justify-center gap-1 ${
-              justAdded
-                ? 'bg-forest-800 text-white border-forest-900'
-                : 'bg-white text-forest-800 hover:bg-forest-50 border-cream-300 hover:border-forest-600'
-            }`}
-            title="Add to WhatsApp Order Bag"
-          >
-            {justAdded ? (
-              <>
-                <Check className="w-3.5 h-3.5 text-olive-300" />
-                <span>ADDED</span>
-              </>
-            ) : (
-              <>
-                <span>ADD</span>
-                <Plus className="w-3.5 h-3.5 text-forest-700" />
-              </>
-            )}
-          </button>
+        {/* Floating Overlapping ADD Button or Quantity Stepper */}
+        <div className="absolute -bottom-2.5 left-1/2 -translate-x-1/2 z-10 w-[92px] sm:w-[100px]">
+          {currentQuantity > 0 ? (
+            <div className="flex items-center justify-between w-full bg-forest-900 text-cream-100 rounded-xl shadow-md border border-forest-800 px-1 py-1 font-bold text-xs select-none">
+              <button
+                type="button"
+                onClick={() => updateQuantity(cartKey, -1)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-forest-800 active:scale-90 transition-all text-cream-200 hover:text-white"
+                aria-label="Decrease quantity"
+              >
+                <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+              </button>
+              <span className="font-serif font-bold text-sm text-cream-100 px-1">
+                {currentQuantity}
+              </span>
+              <button
+                type="button"
+                onClick={() => updateQuantity(cartKey, 1)}
+                className="w-7 h-7 flex items-center justify-center rounded-lg hover:bg-forest-800 active:scale-90 transition-all text-cream-200 hover:text-white"
+                aria-label="Increase quantity"
+              >
+                <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={handleAdd}
+              className="w-full py-1.5 px-2 rounded-xl text-xs font-bold uppercase tracking-wider shadow-md border transition-all active:scale-95 flex items-center justify-center gap-1 bg-white text-forest-800 hover:bg-forest-50 border-cream-300 hover:border-forest-600"
+              title="Add to Order Bag"
+            >
+              <span>ADD</span>
+              <Plus className="w-3.5 h-3.5 text-forest-700 stroke-[2.5]" />
+            </button>
+          )}
         </div>
 
         {/* "Customisable" subtle note below the button if multiple sizes */}

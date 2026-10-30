@@ -1,22 +1,13 @@
-import React, { useState } from 'react';
-import { Sparkles, Plus, Check } from 'lucide-react';
+import React from 'react';
+import { Sparkles, Plus, Minus } from 'lucide-react';
 import { menuItems } from '../data/menuData';
 import { useCart } from '../context/CartContext';
 
 export default function PopularPicks() {
-  const { addToCart } = useCart();
-  const [addedIds, setAddedIds] = useState({});
+  const { addToCart, cart, updateQuantity } = useCart();
 
   // Curated sample of featured items across diverse categories
   const featuredItems = menuItems.filter(item => item.isPopular);
-
-  const handleAdd = (item) => {
-    addToCart(item);
-    setAddedIds(prev => ({ ...prev, [item.id]: true }));
-    setTimeout(() => {
-      setAddedIds(prev => ({ ...prev, [item.id]: false }));
-    }, 1500);
-  };
 
   return (
     <section id="favourites" className="py-16 sm:py-20 bg-white border-b border-cream-200/60">
@@ -50,7 +41,10 @@ export default function PopularPicks() {
           {featuredItems.map((item) => {
             const hasMultipleSizes = Boolean(item.sizes && item.sizes.length > 1);
             const defaultPrice = hasMultipleSizes ? item.sizes[0].price : item.price;
-            const isAdded = addedIds[item.id];
+            const defaultSize = hasMultipleSizes ? item.sizes[0].label : null;
+            const cartKey = `${item.id}-${defaultSize || 'standard'}`;
+            const cartItem = cart?.find(ci => ci.cartKey === cartKey);
+            const currentQuantity = cartItem ? cartItem.quantity : 0;
 
             return (
               <div
@@ -116,27 +110,38 @@ export default function PopularPicks() {
                       )}
                     </div>
 
-                    <button
-                      onClick={() => handleAdd(item)}
-                      className={`inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold transition-all ${
-                        isAdded
-                          ? 'bg-olive-600 text-white'
-                          : 'bg-forest-800 hover:bg-forest-700 text-cream-100 shadow-sm active:scale-95'
-                      }`}
-                      title="Add to WhatsApp Order Bag"
-                    >
-                      {isAdded ? (
-                        <>
-                          <Check className="w-3.5 h-3.5" />
-                          <span>Added</span>
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="w-3.5 h-3.5" />
-                          <span>Add to Bag</span>
-                        </>
-                      )}
-                    </button>
+                    {currentQuantity > 0 ? (
+                      <div className="flex items-center gap-1 bg-forest-900 text-cream-100 rounded-full px-1.5 py-1 shadow-sm border border-forest-800 font-bold text-xs select-none">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(cartKey, -1)}
+                          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-forest-800 active:scale-90 transition-all text-cream-200 hover:text-white"
+                          aria-label="Decrease quantity"
+                        >
+                          <Minus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        </button>
+                        <span className="font-serif font-bold text-sm text-cream-100 px-2 min-w-[20px] text-center">
+                          {currentQuantity}
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(cartKey, 1)}
+                          className="w-6 h-6 flex items-center justify-center rounded-full hover:bg-forest-800 active:scale-90 transition-all text-cream-200 hover:text-white"
+                          aria-label="Increase quantity"
+                        >
+                          <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        </button>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => addToCart(item)}
+                        className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-forest-800 hover:bg-forest-700 text-cream-100 shadow-sm active:scale-95 transition-all"
+                        title="Add to Order Bag"
+                      >
+                        <Plus className="w-3.5 h-3.5 stroke-[2.5]" />
+                        <span>Add to Bag</span>
+                      </button>
+                    )}
                   </div>
                 </div>
               </div>
