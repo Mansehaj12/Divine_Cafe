@@ -16,6 +16,22 @@ const channel = typeof window !== 'undefined' && 'BroadcastChannel' in window
   ? new BroadcastChannel(CHANNEL_NAME)
   : null;
 
+/**
+ * Safely parse incoming cloud payload (supports rich human push notifications with embedded ---DATA--- metadata)
+ */
+export function parseCloudPayload(rawText) {
+  if (!rawText) return null;
+  try {
+    if (typeof rawText === 'string' && rawText.includes('---DATA---')) {
+      const parts = rawText.split('---DATA---');
+      return JSON.parse(parts[1].trim());
+    }
+    return typeof rawText === 'string' ? JSON.parse(rawText) : rawText;
+  } catch (err) {
+    return null;
+  }
+}
+
 // Shared AudioContext for mobile browsers (iOS / Android require user gesture unlock)
 let globalAudioCtx = null;
 
@@ -166,16 +182,38 @@ export async function createOrder(orderData) {
   const updatedOrders = [newOrder, ...currentOrders.filter(o => o.id !== newOrder.id)];
   saveOrdersLocally(updatedOrders);
 
-  // 2. Publish to Live Cloud Relay (Instant cross-device delivery over 4G/5G/Wi-Fi)
+  // 2. Publish to Live Cloud Relay (Instant cross-device sync & iOS/Android Push Notifications)
   try {
-    fetch(CLOUD_ENDPOINT, {
+    const loc = newOrder.diningMode === 'takeaway' ? 'Takeaway' : `Table #${newOrder.tableNumber || '?'}`;
+    const itemsPreview = (newOrder.items || [])
+      .map(i => `${i.quantity}x ${i.name}${i.size ? ` (${i.size})` : ''}`)
+      .join(', ');
+    const noteText = newOrder.notes ? `\nNote: "${newOrder.notes}"` : '';
+
+    const pushMessage = `${loc} • Total: ₹${newOrder.totalAmount}\nItems: ${itemsPreview}${noteText}\n\n---DATA---\n${JSON.stringify(newOrder)}`;
+
+    const ordersUrl = typeof window !== 'undefined'
+      ? `${window.location.origin}${window.location.pathname}#orders`
+      : 'https://mansehaj12.github.io/Divine_Cafe/#orders';
+
+    fetch('https://ntfy.sh', {
       method: 'POST',
-      headers: {
-        'Title': `New Order #${newOrder.id} (${newOrder.diningMode === 'takeaway' ? 'Takeaway' : `Table #${newOrder.tableNumber}`})`,
-        'Tags': 'bell,plate',
-        'Priority': 'urgent'
-      },
-      body: JSON.stringify(newOrder)
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: CLOUD_TOPIC,
+        title: `🔔 New Order #${newOrder.id} • ${loc} (₹${newOrder.totalAmount})`,
+        message: pushMessage,
+        priority: 5,
+        tags: ['bell', 'plate'],
+        click: ordersUrl,
+        actions: [
+          {
+            action: 'view',
+            label: 'Open Kitchen KOT',
+            url: ordersUrl
+          }
+        ]
+      })
     }).catch(() => {});
   } catch {}
 
@@ -207,10 +245,17 @@ export async function updateOrderStatus(orderId, newStatus) {
 
   // Broadcast status update to Cloud Relay
   try {
-    fetch(CLOUD_ENDPOINT, {
+    const payload = { type: 'STATUS_UPDATE', id: orderId, status: newStatus, timestamp: Date.now() };
+    fetch('https://ntfy.sh', {
       method: 'POST',
-      headers: { 'Title': `Status: Order #${orderId} -> ${newStatus}` },
-      body: JSON.stringify({ type: 'STATUS_UPDATE', id: orderId, status: newStatus, timestamp: Date.now() })
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        topic: CLOUD_TOPIC,
+        title: `Order #${orderId} -> ${newStatus.toUpperCase()}`,
+        message: `Order #${orderId} status changed to ${newStatus}\n\n---DATA---\n${JSON.stringify(payload)}`,
+        priority: 3,
+        tags: ['hourglass_done']
+      })
     }).catch(() => {});
   } catch {}
 
@@ -253,7 +298,8 @@ export async function syncFromCloud() {
         try {
           const msg = JSON.parse(line);
           if (msg.event === 'message') {
-            const data = JSON.parse(msg.message);
+            const data = parseCloudPayload(msg.message);
+            if (!data) return;
             if (data.type === 'STATUS_UPDATE' && data.id) {
               if (ordersMap.has(data.id)) {
                 ordersMap.get(data.id).status = data.status;
@@ -335,7 +381,8 @@ export function subscribeToOrders(callback) {
         try {
           const msg = JSON.parse(event.data);
           if (msg.event === 'message') {
-            const data = JSON.parse(msg.message);
+            const data = parseCloudPayload(msg.message);
+            if (!data) return;
             const current = getLocalOrders();
             let updated = [...current];
 

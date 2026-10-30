@@ -15,34 +15,34 @@ export const cafeConfig = {
   heroDescription: "Step into our serene, cozy green sanctuary where every recipe is crafted with mindfulness, pure vegetarian ingredients, and heartfelt care. Handcrafted thin-crust pizzas, comforting brews, gourmet sandwiches, and refreshing coolers await you.",
 
   // Contact & WhatsApp Ordering
-  // Dual-number setup: Owner / Billing Desk (slips) & Alternate Counter Desk
+  // Dual-number setup: Developer / Testing Desk & Owner Counter Desk
   isWhatsappProvided: true,
-  whatsappNumber: "919988959413", // Default primary
+  whatsappNumber: "917888655097", // Developer primary for testing
   
   // Dual Numbers for Slip Cutting & Kitchen Orders
   desks: {
     primary: {
       id: "primary",
-      label: "Owner / Billing Desk",
-      shortLabel: "Desk 1 (Owner)",
-      number: "919988959413",
-      display: "+91 99889 59413",
-      description: "Direct slip cutting & main billing"
+      label: "Developer / Billing Desk",
+      shortLabel: "Desk 1 (Developer)",
+      number: "917888655097",
+      display: "+91 78886 55097",
+      description: "Direct slip cutting & developer testing"
     },
     secondary: {
       id: "secondary",
       label: "Counter / Alternate Desk",
-      shortLabel: "Desk 2 (Counter)",
-      number: "919814377760",
-      display: "+91 98143 77760",
-      description: "In case Owner is away from office"
+      shortLabel: "Desk 2 (Owner)",
+      number: "919988959413",
+      display: "+91 99889 59413",
+      description: "Direct slip cutting & main billing"
     }
   },
 
   // Phone / Calling
   isPhoneProvided: true,
-  phoneNumber: "+91 99889 59413",
-  secondaryPhoneNumber: "+91 98143 77760",
+  phoneNumber: "+91 78886 55097",
+  secondaryPhoneNumber: "+91 99889 59413",
 
   // Address & Google Maps
   isAddressProvided: true,
