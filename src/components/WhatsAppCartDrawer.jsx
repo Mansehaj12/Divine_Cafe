@@ -25,6 +25,13 @@ export default function WhatsAppCartDrawer() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isWhatsappConfigured = cafeConfig.isWhatsappProvided;
 
+  // Whenever items are added to cart, clear any previous receipt so the customer sees their new items!
+  useEffect(() => {
+    if (cart.length > 0 && placedOrder) {
+      setPlacedOrder(null);
+    }
+  }, [cart, placedOrder]);
+
   // Prevent background menu scrolling when drawer is open
   useEffect(() => {
     if (isDrawerOpen) {
@@ -116,10 +123,12 @@ export default function WhatsAppCartDrawer() {
                   </div>
                   <div>
                     <h3 className="font-serif text-lg font-bold text-white">
-                      Order Enquiry Bag
+                      {placedOrder && cart.length === 0 ? 'Order Confirmation' : 'Order Enquiry Bag'}
                     </h3>
                     <p className="text-[11px] text-olive-200">
-                      {totalCount} item{totalCount !== 1 ? 's' : ''} selected
+                      {placedOrder && cart.length === 0 
+                        ? `Order #${placedOrder.id} Placed` 
+                        : `${totalCount} item${totalCount !== 1 ? 's' : ''} selected`}
                     </p>
                   </div>
                 </div>
@@ -134,7 +143,7 @@ export default function WhatsAppCartDrawer() {
 
               {/* Items List / Placed Order View */}
               <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
-                {placedOrder ? (
+                {placedOrder && cart.length === 0 ? (
                   /* Order Success Screen */
                   <div className="text-center py-6 space-y-4">
                     <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center mx-auto shadow-inner">
