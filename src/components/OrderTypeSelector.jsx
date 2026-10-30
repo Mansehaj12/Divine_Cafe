@@ -14,8 +14,8 @@ export default function OrderTypeSelector() {
   };
 
   return (
-    <div className="w-full max-w-sm mx-auto my-1 sm:my-1.5">
-      {/* Compact Half-Height Segmented Dual Box Switcher */}
+    <div className="w-full max-w-xs mx-auto my-1 sm:my-1.5">
+      {/* Clean Half-Height Segmented Dual Box Switcher */}
       <div className="bg-[#122e1f]/95 p-1 rounded-xl border border-forest-700/80 shadow-sm grid grid-cols-2 gap-1">
         
         {/* BOX 1: DINE-IN */}
@@ -23,12 +23,13 @@ export default function OrderTypeSelector() {
           type="button"
           onClick={() => {
             updateDiningMode('dine-in');
+            // Only open picker if table number is not set yet
             if (!tableNumber) {
               setInputVal('');
               setIsEditing(true);
             }
           }}
-          className={`relative py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200 ${
+          className={`relative py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200 ${
             diningMode === 'dine-in'
               ? 'bg-[#1b4931] text-white shadow-xs border border-olive-400/40 ring-1 ring-olive-400/30'
               : 'text-gray-300 hover:text-white hover:bg-forest-900/50 border border-transparent'
@@ -42,19 +43,13 @@ export default function OrderTypeSelector() {
 
           <div className="flex items-center gap-1 truncate text-left">
             <span className="font-bold text-xs">Dine-In</span>
-            <span className="text-[10px] text-cream-200/90 font-medium">
-              {tableNumber ? `#${tableNumber}` : '(Set #)'}
-            </span>
-            {diningMode === 'dine-in' && (
-              <span
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setInputVal(tableNumber || '');
-                  setIsEditing(true);
-                }}
-                className="text-[9px] underline text-olive-300 hover:text-white font-semibold cursor-pointer"
-              >
-                Edit
+            {tableNumber ? (
+              <span className="text-[11px] font-bold text-olive-300">
+                #{tableNumber}
+              </span>
+            ) : (
+              <span className="text-[10px] text-cream-200/70 font-normal">
+                (Set #)
               </span>
             )}
           </div>
@@ -64,7 +59,7 @@ export default function OrderTypeSelector() {
         <button
           type="button"
           onClick={() => updateDiningMode('takeaway')}
-          className={`relative py-1.5 px-2 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200 ${
+          className={`relative py-1.5 px-2.5 rounded-lg flex items-center justify-center gap-1.5 transition-all duration-200 ${
             diningMode === 'takeaway'
               ? 'bg-[#1b4931] text-white shadow-xs border border-olive-400/40 ring-1 ring-olive-400/30'
               : 'text-gray-300 hover:text-white hover:bg-forest-900/50 border border-transparent'
@@ -78,15 +73,12 @@ export default function OrderTypeSelector() {
 
           <div className="flex items-center gap-1 truncate text-left">
             <span className="font-bold text-xs">Takeaway</span>
-            <span className="text-[10px] text-cream-200/80 font-normal hidden sm:inline">
-              (Pickup)
-            </span>
           </div>
         </button>
 
       </div>
 
-      {/* Table Selection Modal */}
+      {/* Table Selection Modal (only opens if table isn't set yet or clicked) */}
       {isEditing && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-in fade-in duration-150">
           <div className="bg-white rounded-3xl p-5 sm:p-6 w-full max-w-xs shadow-2xl border border-cream-300 space-y-4 text-forest-950">
