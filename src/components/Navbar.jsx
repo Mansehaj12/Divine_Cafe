@@ -18,7 +18,6 @@ export default function Navbar({ onOpenMenuScans, onOpenOwnerNotes }) {
 
   const navLinks = [
     { name: 'Home', href: '#home' },
-    { name: 'Highlights', href: '#highlights' },
     { name: 'Favourites', href: '#favourites' },
     { name: 'Digital Menu', href: '#menu' },
     { name: 'Visit Us', href: '#location' },
