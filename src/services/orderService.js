@@ -16,38 +16,76 @@ const channel = typeof window !== 'undefined' && 'BroadcastChannel' in window
   ? new BroadcastChannel(CHANNEL_NAME)
   : null;
 
+// Shared AudioContext for mobile browsers (iOS / Android require user gesture unlock)
+let globalAudioCtx = null;
+
+/**
+ * Initialize / resume AudioContext on user interaction so mobile browsers allow background chimes
+ */
+export function initMobileAudio() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContextClass) return null;
+    if (!globalAudioCtx || globalAudioCtx.state === 'closed') {
+      globalAudioCtx = new AudioContextClass();
+    }
+    if (globalAudioCtx.state === 'suspended') {
+      globalAudioCtx.resume();
+    }
+    return globalAudioCtx;
+  } catch (e) {
+    console.warn("Failed to init audio context:", e);
+    return null;
+  }
+}
+
+function playChime(ctx) {
+  try {
+    // 1. High Ding - 880Hz (A5)
+    const osc1 = ctx.createOscillator();
+    const gain1 = ctx.createGain();
+    osc1.type = 'sine';
+    osc1.frequency.setValueAtTime(880, ctx.currentTime);
+    gain1.gain.setValueAtTime(0.7, ctx.currentTime);
+    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.9);
+    osc1.connect(gain1);
+    gain1.connect(ctx.destination);
+    osc1.start(ctx.currentTime);
+    osc1.stop(ctx.currentTime + 0.9);
+
+    // 2. Harmonic Chime - 1320Hz (E6)
+    const osc2 = ctx.createOscillator();
+    const gain2 = ctx.createGain();
+    osc2.type = 'triangle';
+    osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.12);
+    gain2.gain.setValueAtTime(0.5, ctx.currentTime + 0.12);
+    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
+    osc2.connect(gain2);
+    gain2.connect(ctx.destination);
+    osc2.start(ctx.currentTime + 0.12);
+    osc2.stop(ctx.currentTime + 1.2);
+
+    // 3. Mobile Device Vibration (double buzz for noisy kitchens)
+    if (typeof navigator !== 'undefined' && 'vibrate' in navigator) {
+      navigator.vibrate([200, 100, 250]);
+    }
+  } catch (err) {
+    console.warn("Error playing chime:", err);
+  }
+}
+
 /**
  * Play a realistic two-tone brass service bell using Web Audio API
  */
 export function playOrderBell() {
   try {
-    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-    if (!AudioContextClass) return;
-    const ctx = new AudioContextClass();
-
-    // First tone (High Ding - 880Hz / A5)
-    const osc1 = ctx.createOscillator();
-    const gain1 = ctx.createGain();
-    osc1.type = 'sine';
-    osc1.frequency.setValueAtTime(880, ctx.currentTime);
-    gain1.gain.setValueAtTime(0.6, ctx.currentTime);
-    gain1.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.8);
-    osc1.connect(gain1);
-    gain1.connect(ctx.destination);
-    osc1.start(ctx.currentTime);
-    osc1.stop(ctx.currentTime + 0.8);
-
-    // Second tone (Harmonic chime - 1320Hz / E6)
-    const osc2 = ctx.createOscillator();
-    const gain2 = ctx.createGain();
-    osc2.type = 'triangle';
-    osc2.frequency.setValueAtTime(1320, ctx.currentTime + 0.15);
-    gain2.gain.setValueAtTime(0.4, ctx.currentTime + 0.15);
-    gain2.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 1.2);
-    osc2.connect(gain2);
-    gain2.connect(ctx.destination);
-    osc2.start(ctx.currentTime + 0.15);
-    osc2.stop(ctx.currentTime + 1.2);
+    const ctx = initMobileAudio();
+    if (!ctx) return;
+    if (ctx.state === 'suspended') {
+      ctx.resume().then(() => playChime(ctx)).catch(() => {});
+    } else {
+      playChime(ctx);
+    }
   } catch (err) {
     console.warn("Could not play order bell:", err);
   }

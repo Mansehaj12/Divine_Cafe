@@ -25,7 +25,8 @@ import {
   subscribeToOrders, 
   playOrderBell, 
   clearCompletedOrders,
-  syncFromCloud 
+  syncFromCloud,
+  initMobileAudio
 } from '../services/orderService';
 import { cafeConfig } from '../data/cafeConfig';
 
@@ -66,6 +67,19 @@ export default function KitchenDashboard({ onBackToWebsite }) {
   useEffect(() => {
     const timer = setInterval(() => setCurrentTime(new Date()), 1000);
     return () => clearInterval(timer);
+  }, []);
+
+  // Unlock mobile browser audio on any screen touch/tap
+  useEffect(() => {
+    const unlockAudio = () => {
+      initMobileAudio();
+    };
+    window.addEventListener('click', unlockAudio, { passive: true });
+    window.addEventListener('touchstart', unlockAudio, { passive: true });
+    return () => {
+      window.removeEventListener('click', unlockAudio);
+      window.removeEventListener('touchstart', unlockAudio);
+    };
   }, []);
 
   // Stable updater to eliminate UI flicker
@@ -125,6 +139,7 @@ export default function KitchenDashboard({ onBackToWebsite }) {
     e?.preventDefault();
     const correctPin = cafeConfig.kitchen?.pin || "1470";
     if (pinInput === correctPin) {
+      initMobileAudio();
       setIsAuthenticated(true);
       sessionStorage.setItem('divine_kitchen_auth', 'true');
       setPinError(false);
