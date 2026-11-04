@@ -183,15 +183,15 @@ export default function WhatsAppCartDrawer() {
 
   return (
     <>
-      {/* Sticky Bottom Pill on Mobile if cart has items and drawer is closed */}
+      {/* Sticky Bottom Pill on Mobile if cart has items and drawer is closed (placed right above bottom navigation bar) */}
       {totalCount > 0 && !isDrawerOpen && (
-        <div className="fixed bottom-4 left-4 right-4 z-30 sm:hidden">
+        <div className="fixed bottom-20 left-3 right-3 z-30 md:hidden">
           <button
             onClick={() => {
               setDrawerTab('cart');
               setIsDrawerOpen(true);
             }}
-            className="w-full bg-[#143826] text-cream-100 p-3.5 rounded-2xl shadow-2xl border border-forest-600 flex items-center justify-between animate-in slide-in-from-bottom duration-300"
+            className="w-full bg-[#143826] text-cream-100 p-3 rounded-2xl shadow-2xl border border-forest-600 flex items-center justify-between animate-in slide-in-from-bottom duration-300"
           >
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-lg bg-forest-800 flex items-center justify-center text-olive-300">

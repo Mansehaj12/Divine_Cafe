@@ -68,10 +68,10 @@ export default function FloatingMenuNavigator({ activeCategory, onSelectCategory
 
   if (!isVisible || isDrawerOpen) return null;
 
-  // Adjust bottom offset if the mobile sticky cart bar is visible
+  // Adjust bottom offset so it floats above the mobile bottom nav & cart pill
   const bottomPositionClass = totalCount > 0
-    ? 'bottom-20 sm:bottom-6'
-    : 'bottom-6';
+    ? 'bottom-36 md:bottom-6'
+    : 'bottom-20 md:bottom-6';
 
   return (
     <>

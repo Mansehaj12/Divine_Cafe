@@ -10,13 +10,14 @@ import ContactWhatsApp from './components/ContactWhatsApp';
 import Footer from './components/Footer';
 import WhatsAppCartDrawer from './components/WhatsAppCartDrawer';
 import FloatingMenuNavigator from './components/FloatingMenuNavigator';
+import BottomNav from './components/BottomNav';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
 
   return (
     <CartProvider>
-      <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-forest-950 font-sans selection:bg-[#234438] selection:text-[#FAF7F2]">
+      <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-forest-950 font-sans selection:bg-[#234438] selection:text-[#FAF7F2] pb-16 md:pb-0">
         
         {/* Navigation */}
         <Navbar />
@@ -44,6 +45,9 @@ export default function App() {
 
         {/* WhatsApp Cart Drawer */}
         <WhatsAppCartDrawer />
+
+        {/* Mobile Fixed Bottom Navigation Bar (Home, Cart, Menu, Orders) */}
+        <BottomNav />
 
       </div>
     </CartProvider>
