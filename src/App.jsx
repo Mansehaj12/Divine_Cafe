@@ -10,6 +10,8 @@ import Footer from './components/Footer';
 import WhatsAppCartDrawer from './components/WhatsAppCartDrawer';
 import BottomNav from './components/BottomNav';
 import MenuPage from './components/MenuPage';
+import SplashScreen from './components/SplashScreen';
+import InstallPWA from './components/InstallPWA';
 
 function AppContent({ selectedCategory, setSelectedCategory }) {
   const { currentView } = useCart();
@@ -55,13 +57,29 @@ function AppContent({ selectedCategory, setSelectedCategory }) {
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
+  const [showSplash, setShowSplash] = useState(() => {
+    try {
+      return !sessionStorage.getItem('divine_splash_seen');
+    } catch {
+      return true;
+    }
+  });
+
+  const handleSplashComplete = () => {
+    setShowSplash(false);
+    try {
+      sessionStorage.setItem('divine_splash_seen', 'true');
+    } catch {}
+  };
 
   return (
     <CartProvider>
+      {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
       <AppContent 
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
       />
+      <InstallPWA />
     </CartProvider>
   );
 }

@@ -1,0 +1,27 @@
+{
+  "name": "Divine Cafe - Pure Vegetarian Sanctuary",
+  "short_name": "Divine Cafe",
+  "start_url": "/",
+  "id": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#143826",
+  "theme_color": "#143826",
+  "description": "You Are What You Eat. Handcrafted pure vegetarian pizzas, brews, and delicacies inside Baradari Garden, Patiala.",
+  "orientation": "portrait",
+  "categories": ["food", "lifestyle", "shopping"],
+  "icons": [
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "/pwa-icon.svg",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
