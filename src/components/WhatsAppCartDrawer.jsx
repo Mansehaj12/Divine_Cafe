@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, 
-  Clock, ChefHat, PartyPopper, RotateCcw, History, Calendar, Utensils, BookOpen, ArrowLeft, PlusCircle, PenLine, ArrowLeftRight
+  Clock, ChefHat, PartyPopper, RotateCcw, History, Calendar, Utensils, BookOpen, ArrowLeft, PlusCircle, PenLine, ArrowLeftRight, User
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cafeConfig } from '../data/cafeConfig';
@@ -65,6 +65,8 @@ export default function WhatsAppCartDrawer() {
     tableNumber,
     diningMode,
     updateDiningMode,
+    customerName,
+    updateCustomerName,
     getWhatsAppMessage,
     orderHistory,
     saveOrderToHistory,
@@ -75,6 +77,7 @@ export default function WhatsAppCartDrawer() {
 
   const [notes, setNotes] = useState('');
   const [showInstructions, setShowInstructions] = useState(false);
+  const [nameError, setNameError] = useState(false);
   const [sentOrder, setSentOrder] = useState(null);
   const [currentStep, setCurrentStep] = useState(0);
   const [elapsedSeconds, setElapsedSeconds] = useState(0);
@@ -131,6 +134,20 @@ export default function WhatsAppCartDrawer() {
   const handleSendOrder = () => {
     if (cart.length === 0) return;
 
+    // Validate Customer Name as requested by owner
+    const trimmedName = (customerName || '').trim();
+    if (!trimmedName) {
+      setNameError(true);
+      const inputEl = document.getElementById('cart-customer-name-input');
+      if (inputEl) {
+        inputEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        inputEl.focus();
+      }
+      return;
+    }
+
+    setNameError(false);
+
     // Snapshot order details
     const orderSnapshot = {
       items: [...cart],
@@ -138,6 +155,7 @@ export default function WhatsAppCartDrawer() {
       totalCount,
       diningMode,
       tableNumber: diningMode === 'dine-in' ? tableNumber : '',
+      customerName: trimmedName,
       sentAt: new Date(),
       estimatedTime: getEstimatedTime(cart),
       notes
@@ -147,7 +165,7 @@ export default function WhatsAppCartDrawer() {
     saveOrderToHistory(orderSnapshot);
 
     // Open WhatsApp with pre-formatted message
-    const message = getWhatsAppMessage(notes);
+    const message = getWhatsAppMessage(notes, trimmedName);
     const whatsappUrl = `https://wa.me/${cafeConfig.whatsappNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
 
@@ -846,6 +864,50 @@ export default function WhatsAppCartDrawer() {
                           </div>
                         )}
                       </div>
+                    </div>
+
+                    {/* Customer Name Input Card (Required for WhatsApp Order as requested by Owner) */}
+                    <div className={`bg-white rounded-2xl p-3 sm:p-3.5 border transition-all shadow-2xs ${
+                      nameError ? 'border-red-400 ring-2 ring-red-100 bg-red-50/20' : 'border-cream-200/90'
+                    }`}>
+                      <div className="flex items-center gap-3">
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 border ${
+                          nameError ? 'bg-red-50 border-red-200 text-red-600' : 'bg-forest-50 border-forest-200/60 text-forest-800'
+                        }`}>
+                          <User className="w-4 h-4" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <label htmlFor="cart-customer-name-input" className="text-[10px] uppercase tracking-wider font-bold text-gray-500 block leading-none">
+                              Your Name <span className="text-red-500 font-bold">*</span>
+                            </label>
+                            {customerName && customerName.trim() && (
+                              <span className="text-[10px] text-olive-700 bg-olive-50 px-1.5 py-0.2 rounded-full font-semibold">
+                                Saved ✓
+                              </span>
+                            )}
+                          </div>
+                          <input
+                            id="cart-customer-name-input"
+                            type="text"
+                            value={customerName}
+                            onChange={(e) => {
+                              updateCustomerName(e.target.value);
+                              if (nameError && e.target.value.trim()) {
+                                setNameError(false);
+                              }
+                            }}
+                            placeholder="Enter your name (e.g. Aman)"
+                            className="w-full text-xs font-semibold text-forest-950 placeholder:text-gray-400 placeholder:font-normal bg-transparent focus:outline-none"
+                            maxLength={40}
+                          />
+                        </div>
+                      </div>
+                      {nameError && (
+                        <p className="text-[11px] text-red-600 mt-2 font-medium flex items-center gap-1 pl-11">
+                          ⚠️ Please enter your name before sending order!
+                        </p>
+                      )}
                     </div>
 
                     {/* CRAVING MORE? Horizontal Carousel matching user reference screenshot */}

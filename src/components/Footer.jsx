@@ -62,6 +62,11 @@ export default function Footer() {
               <li>
                 <a href="#contact" className="hover:text-white transition-colors">Contact & WhatsApp</a>
               </li>
+              <li>
+                <a href="/qr-standee.html" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors text-olive-300 font-medium">
+                  🖨️ QR Standee (Print / PDF)
+                </a>
+              </li>
             </ul>
           </div>
 

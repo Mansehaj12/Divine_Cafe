@@ -7,8 +7,28 @@ const CART_STORAGE_KEY = 'divine_cafe_cart';
 const HISTORY_STORAGE_KEY = 'divine_cafe_order_history';
 const TABLE_STORAGE_KEY = 'divine_cafe_table';
 const MODE_STORAGE_KEY = 'divine_cafe_dining_mode';
+const NAME_STORAGE_KEY = 'divine_cafe_customer_name';
 
 export function CartProvider({ children }) {
+  // Customer Name State (saved so repeat customers don't have to re-enter it)
+  const [customerName, setCustomerName] = useState(() => {
+    try {
+      return localStorage.getItem(NAME_STORAGE_KEY) || '';
+    } catch {
+      return '';
+    }
+  });
+
+  const updateCustomerName = (val) => {
+    setCustomerName(val);
+    try {
+      if (val && val.trim()) {
+        localStorage.setItem(NAME_STORAGE_KEY, val.trim());
+      } else {
+        localStorage.removeItem(NAME_STORAGE_KEY);
+      }
+    } catch {}
+  };
   // Active Cart State
   const [cart, setCart] = useState(() => {
     try {
@@ -279,20 +299,25 @@ export function CartProvider({ children }) {
   const totalAmount = cart.reduce((acc, item) => acc + (item.price * item.quantity), 0);
 
   // Sanitized message generator for WhatsApp
-  const getWhatsAppMessage = (customerNotes = '') => {
+  const getWhatsAppMessage = (customerNotes = '', nameOverride = null) => {
     const isDineIn = diningMode === 'dine-in';
     const hasTable = isDineIn && Boolean(tableNumber && tableNumber.trim());
+    const finalName = (nameOverride !== null ? nameOverride : customerName).trim();
 
     let msg = isDineIn
       ? `*🍽️ DINE-IN ORDER - DIVINE CAFE*\n`
       : `*🛍️ TAKEAWAY ORDER - DIVINE CAFE*\n`;
     
+    if (finalName) {
+      msg += `👤 *Customer Name:* ${finalName}\n`;
+    }
+
     if (hasTable) {
       msg += `📍 *Table Number:* #${tableNumber.trim()}\n`;
     } else if (isDineIn) {
-      msg += `📍 *Service:* Dine-In (Table not specified)\n`;
+      msg += `📍 *Service:* Dine-In\n`;
     } else {
-      msg += `📍 *Service:* Takeaway / Pickup\n`;
+      msg += `📍 *Service:* Takeaway / Counter Pickup\n`;
     }
 
     msg += `_“You Are What You Eat”_\n\n`;
@@ -334,6 +359,8 @@ export function CartProvider({ children }) {
       updateTableNumber,
       diningMode,
       updateDiningMode,
+      customerName,
+      updateCustomerName,
       getWhatsAppMessage,
       orderHistory,
       saveOrderToHistory,
