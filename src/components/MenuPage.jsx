@@ -72,7 +72,7 @@ export default function MenuPage({ selectedCategory, onSelectCategory }) {
       </header>
 
       {/* Main Menu Content (All 52 dishes, search, categories) */}
-      <main className="flex-1">
+      <main className={`flex-1 ${totalCount > 0 ? 'pb-20 sm:pb-8' : 'pb-6'}`}>
         <DigitalMenu 
           activeCategory={selectedCategory}
           onSelectCategory={onSelectCategory}

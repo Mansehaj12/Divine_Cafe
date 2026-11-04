@@ -6,7 +6,7 @@ import { useCart } from '../context/useCart';
 export default function FloatingMenuNavigator({ activeCategory, onSelectCategory }) {
   const [isOpen, setIsOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const { totalCount, isDrawerOpen } = useCart();
+  const { totalCount, isDrawerOpen, currentView } = useCart();
 
   // Show floating button after user scrolls slightly past hero
   useEffect(() => {
@@ -68,10 +68,11 @@ export default function FloatingMenuNavigator({ activeCategory, onSelectCategory
 
   if (!isVisible || isDrawerOpen) return null;
 
-  // Adjust bottom offset so it floats above the mobile bottom nav & cart pill
+  // Adjust bottom offset so it floats above bottom edge or cart pill
+  const isMenuPage = currentView === 'menu';
   const bottomPositionClass = totalCount > 0
-    ? 'bottom-36 md:bottom-6'
-    : 'bottom-20 md:bottom-6';
+    ? (isMenuPage ? 'bottom-20 sm:bottom-6' : 'bottom-36 md:bottom-6')
+    : (isMenuPage ? 'bottom-4 sm:bottom-6' : 'bottom-20 md:bottom-6');
 
   return (
     <>

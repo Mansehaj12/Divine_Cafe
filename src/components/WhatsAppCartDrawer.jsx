@@ -55,6 +55,7 @@ export default function WhatsAppCartDrawer() {
     setIsDrawerOpen,
     drawerTab,
     setDrawerTab,
+    currentView,
     navigateTo,
     updateQuantity,
     removeFromCart,
@@ -184,15 +185,24 @@ export default function WhatsAppCartDrawer() {
 
   return (
     <>
-      {/* Sticky Bottom Pill on Mobile if cart has items and drawer is closed (placed right above bottom navigation bar) */}
+      {/* Sticky Bottom Pill on Mobile if cart has items and drawer is closed */}
       {totalCount > 0 && !isDrawerOpen && (
-        <div className="fixed bottom-20 left-3 right-3 z-30 md:hidden">
+        <div 
+          className={`fixed left-3 right-3 z-30 md:hidden transition-all duration-300 ${
+            currentView === 'menu' ? 'bottom-3 sm:bottom-4' : 'bottom-20'
+          }`}
+          style={{
+            bottom: currentView === 'menu' 
+              ? 'calc(0.75rem + env(safe-area-inset-bottom, 0px))' 
+              : undefined
+          }}
+        >
           <button
             onClick={() => {
               setDrawerTab('cart');
               setIsDrawerOpen(true);
             }}
-            className="w-full bg-[#143826] text-cream-100 p-3 rounded-2xl shadow-2xl border border-forest-600 flex items-center justify-between animate-in slide-in-from-bottom duration-300"
+            className="w-full bg-[#143826] text-cream-100 p-3 sm:p-3.5 rounded-2xl shadow-2xl border border-forest-600 flex items-center justify-between animate-in slide-in-from-bottom duration-300 active:scale-[0.98]"
           >
             <div className="flex items-center gap-3">
               <div className="relative w-8 h-8 rounded-lg bg-forest-800 flex items-center justify-center text-olive-300">
