@@ -695,169 +695,173 @@ export default function WhatsAppCartDrawer() {
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between pb-2 border-b border-cream-200">
-                      <span className="text-xs text-gray-500 uppercase tracking-wider font-semibold">
-                        Selected Items
-                      </span>
-                      <button
-                        onClick={clearCart}
-                        className="text-xs text-red-600 hover:text-red-700 font-medium flex items-center gap-1"
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                        <span>Clear All</span>
-                      </button>
-                    </div>
-
-                    {/* Cart Items List (matching user reference screenshot) */}
-                    <div className="space-y-2.5">
-                      {cart.map((item) => (
-                        <div
-                          key={item.cartKey}
-                          className="flex items-center justify-between gap-3 p-3 bg-white rounded-xl border border-cream-200/90 shadow-2xs"
+                    {/* Single Consolidated Box: Items Added + Action Buttons (matching user screenshot) */}
+                    <div className="bg-white rounded-3xl p-4 sm:p-5 border border-cream-200/90 shadow-xs space-y-3">
+                      {/* Box Header */}
+                      <div className="flex items-center justify-between pb-1">
+                        <h4 className="text-xs font-bold uppercase tracking-wider text-forest-950">
+                          ITEMS ADDED
+                        </h4>
+                        <button
+                          onClick={clearCart}
+                          className="text-[11px] text-red-500 hover:text-red-700 font-medium flex items-center gap-1 transition-colors"
                         >
-                          {/* Left: Veg Badge & Item Name */}
-                          <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                            <span className="veg-badge shrink-0 scale-90">
-                              <span className="veg-dot"></span>
-                            </span>
-                            <div className="min-w-0">
-                              <h4 className="text-xs sm:text-sm font-semibold text-forest-950 truncate">
-                                {item.name}
-                              </h4>
-                              {item.size && (
-                                <span className="text-[10px] text-gray-500 block">
-                                  {item.size}
-                                </span>
-                              )}
-                            </div>
-                          </div>
+                          <Trash2 className="w-3 h-3" />
+                          <span>Clear All</span>
+                        </button>
+                      </div>
 
-                          {/* Right: Quantity Controls Pill [- 1 +] & Price */}
-                          <div className="flex items-center gap-2 shrink-0">
-                            <div className="flex items-center border border-gray-300 rounded-lg p-0.5 bg-white">
-                              <button
-                                type="button"
-                                onClick={() => updateQuantity(item.cartKey, -1)}
-                                className="w-6 h-6 rounded flex items-center justify-center hover:bg-cream-100 text-forest-900 active:scale-90"
-                                aria-label="Decrease quantity"
-                              >
-                                <Minus className="w-3 h-3" />
-                              </button>
-                              <span className="text-xs font-bold text-forest-950 px-2 text-center min-w-[20px]">
-                                {item.quantity}
+                      {/* Items List separated by dashed lines */}
+                      <div className="divide-y divide-dashed divide-gray-200">
+                        {cart.map((item) => (
+                          <div
+                            key={item.cartKey}
+                            className="py-3 first:pt-1 last:pb-1 flex items-center justify-between gap-3"
+                          >
+                            {/* Left: Veg Badge & Name */}
+                            <div className="flex items-start gap-2.5 min-w-0 flex-1">
+                              <span className="veg-badge shrink-0 scale-90 mt-0.5">
+                                <span className="veg-dot"></span>
                               </span>
-                              <button
-                                type="button"
-                                onClick={() => updateQuantity(item.cartKey, 1)}
-                                className="w-6 h-6 rounded flex items-center justify-center hover:bg-cream-100 text-forest-900 active:scale-90"
-                                aria-label="Increase quantity"
-                              >
-                                <Plus className="w-3 h-3" />
-                              </button>
+                              <div className="min-w-0">
+                                <h4 className="text-xs sm:text-sm font-semibold text-forest-950 truncate">
+                                  {item.name}
+                                </h4>
+                                {item.size && (
+                                  <span className="text-[11px] text-gray-500 block leading-tight mt-0.5">
+                                    {item.size}
+                                  </span>
+                                )}
+                              </div>
                             </div>
 
-                            {/* Price */}
-                            <span className="text-xs sm:text-sm font-serif font-bold text-forest-950 min-w-[50px] text-right">
-                              ₹{item.price * item.quantity}
-                            </span>
+                            {/* Right: Quantity Controls Pill [- 1 +] & Price */}
+                            <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
+                              <div className="flex items-center border border-gray-300 rounded-lg p-0.5 bg-white">
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(item.cartKey, -1)}
+                                  className="w-6 h-6 rounded flex items-center justify-center hover:bg-cream-100 text-forest-900 active:scale-90"
+                                  aria-label="Decrease quantity"
+                                >
+                                  <Minus className="w-3 h-3" />
+                                </button>
+                                <span className="text-xs font-bold text-forest-950 px-2 text-center min-w-[20px]">
+                                  {item.quantity}
+                                </span>
+                                <button
+                                  type="button"
+                                  onClick={() => updateQuantity(item.cartKey, 1)}
+                                  className="w-6 h-6 rounded flex items-center justify-center hover:bg-cream-100 text-forest-900 active:scale-90"
+                                  aria-label="Increase quantity"
+                                >
+                                  <Plus className="w-3 h-3" />
+                                </button>
+                              </div>
+
+                              {/* Price */}
+                              <span className="text-xs sm:text-sm font-serif font-bold text-forest-950 min-w-[48px] text-right">
+                                ₹{item.price * item.quantity}
+                              </span>
+                            </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-
-                    {/* Dashed Separator Line matching screenshot */}
-                    <div className="border-b border-dashed border-gray-300 my-2"></div>
-
-                    {/* Action Buttons: Add More Items & Add Instructions (matching user screenshot) */}
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() => {
-                          setIsDrawerOpen(false);
-                          navigateTo('menu');
-                        }}
-                        className="flex-1 py-2.5 px-3 rounded-xl border border-gray-300 hover:border-forest-600 bg-white hover:bg-cream-50 text-forest-950 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95"
-                      >
-                        <PlusCircle className="w-4 h-4 text-forest-800" />
-                        <span>Add More Items</span>
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setShowInstructions(!showInstructions)}
-                        className={`flex-1 py-2.5 px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 ${
-                          notes || showInstructions
-                            ? 'border-forest-800 bg-forest-50 text-forest-900'
-                            : 'border-gray-300 hover:border-forest-600 bg-white hover:bg-cream-50 text-forest-950'
-                        }`}
-                      >
-                        <PenLine className="w-4 h-4 text-forest-800" />
-                        <span>{notes ? 'Edit Instructions' : 'Add Instructions'}</span>
-                      </button>
-                    </div>
-
-                    {/* Special Instructions Expandable Area (ONLY opens when user clicks Add Instructions) */}
-                    {showInstructions && (
-                      <div className="p-3 bg-cream-50 rounded-2xl border border-cream-300 space-y-2 animate-in fade-in duration-150">
-                        <div className="flex items-center justify-between">
-                          <label className="text-xs font-bold text-forest-950 flex items-center gap-1.5">
-                            <PenLine className="w-3.5 h-3.5 text-forest-800" />
-                            <span>Special Cooking / Preparation Notes:</span>
-                          </label>
-                          <button
-                            type="button"
-                            onClick={() => setShowInstructions(false)}
-                            className="text-xs text-gray-400 hover:text-gray-600 p-1"
-                          >
-                            <X className="w-3.5 h-3.5" />
-                          </button>
-                        </div>
-                        <textarea
-                          rows="2"
-                          value={notes}
-                          onChange={(e) => setNotes(e.target.value)}
-                          placeholder="e.g. Less spicy, packing required, extra napkins..."
-                          className="w-full text-xs p-2.5 rounded-xl border border-cream-300 bg-white focus:outline-none focus:ring-1 focus:ring-forest-600 text-forest-950 shadow-2xs"
-                          autoFocus
-                        />
-                        <div className="flex justify-end gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setShowInstructions(false)}
-                            className="px-4 py-1.5 rounded-lg bg-forest-800 hover:bg-forest-900 text-white text-xs font-semibold shadow-xs"
-                          >
-                            Done
-                          </button>
-                        </div>
+                        ))}
                       </div>
-                    )}
 
-                    {/* If notes already saved and instructions panel is collapsed, show note preview */}
-                    {notes && !showInstructions && (
-                      <div className="p-2.5 bg-cream-100/80 rounded-xl border border-cream-200/90 flex items-start justify-between gap-2 text-xs">
-                        <div className="flex items-start gap-1.5 text-forest-900">
-                          <PenLine className="w-3.5 h-3.5 text-forest-700 shrink-0 mt-0.5" />
-                          <span className="italic line-clamp-2">"{notes}"</span>
-                        </div>
-                        <div className="flex items-center gap-1 shrink-0">
+                      {/* Dotted Separator Line inside the box */}
+                      <div className="border-t border-dashed border-gray-200 pt-3">
+                        {/* Two Action Buttons: Add More Items & Add Instructions */}
+                        <div className="flex items-center gap-2">
                           <button
                             type="button"
-                            onClick={() => setShowInstructions(true)}
-                            className="text-[11px] font-bold text-forest-800 hover:underline"
+                            onClick={() => {
+                              setIsDrawerOpen(false);
+                              navigateTo('menu');
+                            }}
+                            className="flex-1 py-2 px-2.5 sm:px-3 rounded-xl border border-gray-300 hover:border-forest-600 bg-white hover:bg-cream-50 text-forest-950 text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95"
                           >
-                            Edit
+                            <PlusCircle className="w-4 h-4 text-forest-800 shrink-0" />
+                            <span className="truncate">Add More Items</span>
                           </button>
-                          <span className="text-gray-300">•</span>
+
                           <button
                             type="button"
-                            onClick={() => setNotes('')}
-                            className="text-[11px] text-red-600 hover:underline"
+                            onClick={() => setShowInstructions(!showInstructions)}
+                            className={`flex-1 py-2 px-2.5 sm:px-3 rounded-xl border text-xs font-semibold flex items-center justify-center gap-1.5 transition-all shadow-2xs active:scale-95 ${
+                              notes || showInstructions
+                                ? 'border-forest-800 bg-forest-50 text-forest-900'
+                                : 'border-gray-300 hover:border-forest-600 bg-white hover:bg-cream-50 text-forest-950'
+                            }`}
                           >
-                            Remove
+                            <PenLine className="w-4 h-4 text-forest-800 shrink-0" />
+                            <span className="truncate">{notes ? 'Edit Instructions' : 'Add Instructions'}</span>
                           </button>
                         </div>
+
+                        {/* Special Instructions Expandable Area (ONLY opens when user clicks Add Instructions) */}
+                        {showInstructions && (
+                          <div className="mt-3 p-3 bg-cream-50 rounded-2xl border border-cream-300 space-y-2 animate-in fade-in duration-150">
+                            <div className="flex items-center justify-between">
+                              <label className="text-xs font-bold text-forest-950 flex items-center gap-1.5">
+                                <PenLine className="w-3.5 h-3.5 text-forest-800" />
+                                <span>Special Cooking / Preparation Notes:</span>
+                              </label>
+                              <button
+                                type="button"
+                                onClick={() => setShowInstructions(false)}
+                                className="text-xs text-gray-400 hover:text-gray-600 p-1"
+                              >
+                                <X className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                            <textarea
+                              rows="2"
+                              value={notes}
+                              onChange={(e) => setNotes(e.target.value)}
+                              placeholder="e.g. Less spicy, packing required, extra napkins..."
+                              className="w-full text-xs p-2.5 rounded-xl border border-cream-300 bg-white focus:outline-none focus:ring-1 focus:ring-forest-600 text-forest-950 shadow-2xs"
+                              autoFocus
+                            />
+                            <div className="flex justify-end gap-2">
+                              <button
+                                type="button"
+                                onClick={() => setShowInstructions(false)}
+                                className="px-4 py-1.5 rounded-lg bg-forest-800 hover:bg-forest-900 text-white text-xs font-semibold shadow-xs"
+                              >
+                                Done
+                              </button>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* If notes already saved and instructions panel is collapsed, show note preview */}
+                        {notes && !showInstructions && (
+                          <div className="mt-2.5 p-2 bg-cream-100/80 rounded-xl border border-cream-200/90 flex items-start justify-between gap-2 text-xs">
+                            <div className="flex items-start gap-1.5 text-forest-900">
+                              <PenLine className="w-3 h-3 text-forest-700 shrink-0 mt-0.5" />
+                              <span className="italic line-clamp-2">"{notes}"</span>
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <button
+                                type="button"
+                                onClick={() => setShowInstructions(true)}
+                                className="text-[11px] font-bold text-forest-800 hover:underline"
+                              >
+                                Edit
+                              </button>
+                              <span className="text-gray-300">•</span>
+                              <button
+                                type="button"
+                                onClick={() => setNotes('')}
+                                className="text-[11px] text-red-600 hover:underline"
+                              >
+                                Remove
+                              </button>
+                            </div>
+                          </div>
+                        )}
                       </div>
-                    )}
+                    </div>
 
                     {/* CRAVING MORE? Horizontal Carousel matching user reference screenshot */}
                     {cravingMoreItems.length > 0 && (
