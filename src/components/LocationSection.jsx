@@ -107,17 +107,6 @@ export default function LocationSection() {
                       >
                         {cafeConfig.phoneNumber}
                       </a>
-                      {cafeConfig.secondaryPhoneNumber && (
-                        <>
-                          <span className="text-gray-300">•</span>
-                          <a
-                            href={`tel:${cafeConfig.secondaryPhoneNumber}`}
-                            className="hover:text-forest-700 hover:underline"
-                          >
-                            {cafeConfig.secondaryPhoneNumber}
-                          </a>
-                        </>
-                      )}
                     </div>
                   ) : (
                     <a

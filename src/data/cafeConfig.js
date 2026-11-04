@@ -14,35 +14,13 @@ export const cafeConfig = {
   heroHeading: "Good Food. Great Mood.",
   heroDescription: "Step into our serene, cozy green sanctuary where every recipe is crafted with mindfulness, pure vegetarian ingredients, and heartfelt care. Handcrafted thin-crust pizzas, comforting brews, gourmet sandwiches, and refreshing coolers await you.",
 
-  // Contact & WhatsApp Ordering
-  // Dual-number setup: Developer / Testing Desk & Owner Counter Desk
+  // Contact & WhatsApp Ordering (Single owner number)
   isWhatsappProvided: true,
-  whatsappNumber: "917888655097", // Developer primary for testing
-  
-  // Dual Numbers for Slip Cutting & Kitchen Orders
-  desks: {
-    primary: {
-      id: "primary",
-      label: "Developer / Billing Desk",
-      shortLabel: "Desk 1 (Developer)",
-      number: "917888655097",
-      display: "+91 78886 55097",
-      description: "Direct slip cutting & developer testing"
-    },
-    secondary: {
-      id: "secondary",
-      label: "Counter / Alternate Desk",
-      shortLabel: "Desk 2 (Owner)",
-      number: "919988959413",
-      display: "+91 99889 59413",
-      description: "Direct slip cutting & main billing"
-    }
-  },
+  whatsappNumber: "919988959413", // Owner's WhatsApp number
 
   // Phone / Calling
   isPhoneProvided: true,
-  phoneNumber: "+91 78886 55097",
-  secondaryPhoneNumber: "+91 99889 59413",
+  phoneNumber: "+91 99889 59413",
 
   // Address & Google Maps
   isAddressProvided: true,
@@ -62,15 +40,7 @@ export const cafeConfig = {
     directionsUrl: "https://www.google.com/maps/dir//DIVINE+ORGANICS,+Mall+Rd,+inside+Baradari+Garden,+opposite+PEER+BABA+JI+DARGAH,+Lahori+Gate,+Patiala,+Punjab+147001/@30.3335748,76.4000812,17z"
   },
 
-  // Kitchen & Counter Live Orders Dashboard
-  kitchen: {
-    pin: "1470", // 4-digit PIN for Owner / Staff login to view live slips
-    autoSoundAlert: true,
-    // Optional: Firebase Realtime Database URL for multi-device cloud sync
-    // e.g. "https://your-cafe-orders-default-rtdb.firebaseio.com"
-    firebaseDbUrl: "",
-    soundEnabledDefault: true
-  },
+
 
   // Operating Hours (Kept uninvented / placeholder until provided)
   isHoursProvided: false,

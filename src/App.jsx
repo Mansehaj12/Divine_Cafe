@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { CartProvider } from './context/CartContext';
 import Navbar from './components/Navbar';
 import Hero from './components/Hero';
@@ -10,66 +10,9 @@ import ContactWhatsApp from './components/ContactWhatsApp';
 import Footer from './components/Footer';
 import WhatsAppCartDrawer from './components/WhatsAppCartDrawer';
 import FloatingMenuNavigator from './components/FloatingMenuNavigator';
-import KitchenDashboard from './components/KitchenDashboard';
 
 export default function App() {
   const [selectedCategory, setSelectedCategory] = useState("all");
-
-  const [currentView, setCurrentView] = useState(() => {
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const hash = window.location.hash;
-      const path = window.location.pathname;
-      if (params.get('view') === 'orders' || hash === '#orders' || path === '/orders') {
-        return 'kitchen';
-      }
-      return 'customer';
-    } catch {
-      return 'customer';
-    }
-  });
-
-  // Watch URL changes for /orders or #orders
-  useEffect(() => {
-    const handleLocation = () => {
-      const params = new URLSearchParams(window.location.search);
-      const hash = window.location.hash;
-      const path = window.location.pathname;
-      if (params.get('view') === 'orders' || hash === '#orders' || path === '/orders') {
-        setCurrentView('kitchen');
-      } else {
-        setCurrentView('customer');
-      }
-    };
-    window.addEventListener('hashchange', handleLocation);
-    window.addEventListener('popstate', handleLocation);
-    return () => {
-      window.removeEventListener('hashchange', handleLocation);
-      window.removeEventListener('popstate', handleLocation);
-    };
-  }, []);
-
-  const openKitchenView = () => {
-    window.location.hash = 'orders';
-    setCurrentView('kitchen');
-  };
-
-  const closeKitchenView = () => {
-    window.location.hash = '';
-    const url = new URL(window.location.href);
-    url.searchParams.delete('view');
-    window.history.pushState({}, '', url.pathname + (url.search ? url.search : ''));
-    setCurrentView('customer');
-  };
-
-  // If in Kitchen / Staff Slip Desk Mode
-  if (currentView === 'kitchen') {
-    return (
-      <CartProvider>
-        <KitchenDashboard onBackToWebsite={closeKitchenView} />
-      </CartProvider>
-    );
-  }
 
   return (
     <CartProvider>
@@ -78,7 +21,7 @@ export default function App() {
         {/* Navigation */}
         <Navbar />
 
-        {/* Main Content Sections: MENU AS FIRST PRIORITY */}
+        {/* Main Content Sections */}
         <main className="flex-1">
           <Hero />
           <DigitalMenu 
@@ -99,7 +42,7 @@ export default function App() {
           onSelectCategory={setSelectedCategory}
         />
 
-        {/* Floating / Interactive Modals and Drawers */}
+        {/* WhatsApp Cart Drawer */}
         <WhatsAppCartDrawer />
 
       </div>
