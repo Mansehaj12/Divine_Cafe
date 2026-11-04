@@ -1,7 +1,24 @@
-import React, { useState, useEffect } from 'react';
-import { X, Trash2, Plus, Minus, Send, ShoppingBag, ArrowRight } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, Clock, ChefHat, PartyPopper, RotateCcw } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cafeConfig } from '../data/cafeConfig';
+
+// Estimate prep time based on item count & types
+function getEstimatedTime(items) {
+  const count = items.reduce((sum, i) => sum + i.quantity, 0);
+  if (count <= 2) return { min: 5, max: 10 };
+  if (count <= 5) return { min: 10, max: 18 };
+  if (count <= 8) return { min: 15, max: 25 };
+  return { min: 20, max: 35 };
+}
+
+// Stepper stages for the order tracker
+const ORDER_STEPS = [
+  { id: 'sent', label: 'Order Sent', icon: CheckCircle2, description: 'Your order has been sent via WhatsApp' },
+  { id: 'received', label: 'Being Reviewed', icon: Clock, description: 'Cafe is reviewing your order' },
+  { id: 'preparing', label: 'Preparing', icon: ChefHat, description: 'Your food is being freshly prepared' },
+  { id: 'ready', label: 'Ready!', icon: PartyPopper, description: 'Your order should be ready now' },
+];
 
 export default function WhatsAppCartDrawer() {
   const {
@@ -20,26 +37,108 @@ export default function WhatsAppCartDrawer() {
   } = useCart();
 
   const [notes, setNotes] = useState('');
+  const [sentOrder, setSentOrder] = useState(null); // { items, totalAmount, totalCount, diningMode, tableNumber, sentAt, estimatedTime }
+  const [currentStep, setCurrentStep] = useState(0);
+  const [elapsedSeconds, setElapsedSeconds] = useState(0);
+
+  // Whenever new items are added to cart, clear confirmation so user sees their fresh cart
+  useEffect(() => {
+    if (cart.length > 0 && sentOrder) {
+      setSentOrder(null);
+      setCurrentStep(0);
+      setElapsedSeconds(0);
+    }
+  }, [cart, sentOrder]);
 
   // Prevent background menu scrolling when drawer is open
   useEffect(() => {
     if (isDrawerOpen) {
       const originalOverflow = document.body.style.overflow;
       document.body.style.overflow = 'hidden';
-
       return () => {
         document.body.style.overflow = originalOverflow;
       };
     }
   }, [isDrawerOpen]);
 
+  // Timer: count elapsed seconds and auto-advance steps after order is sent
+  useEffect(() => {
+    if (!sentOrder) return;
+
+    const interval = setInterval(() => {
+      setElapsedSeconds(prev => prev + 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [sentOrder]);
+
+  // Auto-advance tracker steps based on elapsed time
+  useEffect(() => {
+    if (!sentOrder) return;
+
+    const estMinSeconds = sentOrder.estimatedTime.min * 60;
+    const estMaxSeconds = sentOrder.estimatedTime.max * 60;
+
+    // Step 0 → 1: After 8 seconds (simulate "received/reviewing")
+    if (elapsedSeconds >= 8 && currentStep < 1) {
+      setCurrentStep(1);
+    }
+    // Step 1 → 2: After 30% of min estimated time (preparing)
+    if (elapsedSeconds >= estMinSeconds * 0.3 && currentStep < 2) {
+      setCurrentStep(2);
+    }
+    // Step 2 → 3: After min estimated time (ready!)
+    if (elapsedSeconds >= estMinSeconds && currentStep < 3) {
+      setCurrentStep(3);
+    }
+  }, [elapsedSeconds, sentOrder, currentStep]);
+
   const handleSendOrder = () => {
     if (cart.length === 0) return;
 
-    // Build the WhatsApp message and open WhatsApp directly
+    // Capture order details before clearing
+    const orderSnapshot = {
+      items: [...cart],
+      totalAmount,
+      totalCount,
+      diningMode,
+      tableNumber,
+      sentAt: new Date(),
+      estimatedTime: getEstimatedTime(cart),
+    };
+
+    // Open WhatsApp with pre-formatted message
     const message = getWhatsAppMessage(notes);
     const whatsappUrl = `https://wa.me/${cafeConfig.whatsappNumber}?text=${message}`;
     window.open(whatsappUrl, '_blank');
+
+    // Show confirmation tracker
+    setSentOrder(orderSnapshot);
+    setCurrentStep(0);
+    setElapsedSeconds(0);
+    setNotes('');
+    clearCart();
+  };
+
+  const handleNewOrder = () => {
+    setSentOrder(null);
+    setCurrentStep(0);
+    setElapsedSeconds(0);
+    setIsDrawerOpen(false);
+  };
+
+  // Format elapsed time as mm:ss
+  const formatElapsed = (s) => {
+    const m = Math.floor(s / 60);
+    const sec = s % 60;
+    return `${m}:${sec.toString().padStart(2, '0')}`;
+  };
+
+  // Progress bar percentage (0-100)
+  const getProgress = () => {
+    if (!sentOrder) return 0;
+    const maxSec = sentOrder.estimatedTime.max * 60;
+    return Math.min(100, Math.round((elapsedSeconds / maxSec) * 100));
   };
 
   return (
@@ -89,14 +188,16 @@ export default function WhatsAppCartDrawer() {
               <div className="p-5 sm:p-6 bg-[#143826] text-cream-100 flex items-center justify-between border-b border-forest-800">
                 <div className="flex items-center gap-2.5">
                   <div className="w-8 h-8 rounded-lg bg-forest-800 flex items-center justify-center text-olive-300">
-                    <ShoppingBag className="w-4 h-4" />
+                    {sentOrder ? <CheckCircle2 className="w-4 h-4" /> : <ShoppingBag className="w-4 h-4" />}
                   </div>
                   <div>
                     <h3 className="font-serif text-lg font-bold text-white">
-                      Order Bag
+                      {sentOrder ? 'Order Tracker' : 'Order Bag'}
                     </h3>
                     <p className="text-[11px] text-olive-200">
-                      {totalCount} item{totalCount !== 1 ? 's' : ''} selected
+                      {sentOrder
+                        ? `Sent at ${sentOrder.sentAt.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: true })}`
+                        : `${totalCount} item${totalCount !== 1 ? 's' : ''} selected`}
                     </p>
                   </div>
                 </div>
@@ -109,9 +210,156 @@ export default function WhatsAppCartDrawer() {
                 </button>
               </div>
 
-              {/* Items List */}
+              {/* Content Area */}
               <div className="flex-1 overflow-y-auto overscroll-contain p-5 sm:p-6 space-y-4">
-                {cart.length === 0 ? (
+
+                {/* ===== ORDER SENT CONFIRMATION & TRACKER ===== */}
+                {sentOrder && cart.length === 0 ? (
+                  <div className="space-y-5">
+                    {/* Success Header */}
+                    <div className="text-center space-y-3">
+                      <div className="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 flex items-center justify-center mx-auto shadow-inner animate-bounce" style={{ animationDuration: '2s', animationIterationCount: 3 }}>
+                        <CheckCircle2 className="w-8 h-8" />
+                      </div>
+                      <div>
+                        <span className="text-[11px] font-bold uppercase tracking-widest text-emerald-800 bg-emerald-50 px-3 py-1 rounded-full border border-emerald-200">
+                          Order Sent ✓
+                        </span>
+                        <h3 className="font-serif text-xl font-bold text-forest-950 mt-2">
+                          Message Sent to Divine Cafe!
+                        </h3>
+                        <p className="text-xs text-gray-500 mt-1">
+                          Please complete sending the message on WhatsApp if prompted.
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Order Summary Card */}
+                    <div className="p-4 bg-cream-100/80 rounded-2xl border border-cream-200 space-y-2.5">
+                      <div className="flex items-center justify-between border-b border-cream-200/80 pb-2">
+                        <span className="text-xs text-gray-500">Service:</span>
+                        <span className="font-semibold text-forest-950 text-xs">
+                          {sentOrder.diningMode === 'takeaway' ? '🛍️ Takeaway' : `🍽️ Dine-In ${sentOrder.tableNumber ? `(Table #${sentOrder.tableNumber})` : ''}`}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between border-b border-cream-200/80 pb-2">
+                        <span className="text-xs text-gray-500">Items:</span>
+                        <span className="text-xs font-medium text-forest-900">{sentOrder.totalCount} item{sentOrder.totalCount !== 1 ? 's' : ''}</span>
+                      </div>
+                      <div className="flex items-center justify-between pt-0.5">
+                        <span className="text-xs font-bold text-forest-950">Total Amount:</span>
+                        <span className="font-serif font-bold text-base text-forest-950">₹{sentOrder.totalAmount}</span>
+                      </div>
+                    </div>
+
+                    {/* Items List (Collapsed) */}
+                    <div className="space-y-1.5">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-wider font-semibold">Items Ordered</p>
+                      {sentOrder.items.map((item, i) => (
+                        <div key={i} className="flex items-center justify-between text-xs px-3 py-2 bg-cream-50 rounded-lg border border-cream-200/60">
+                          <span className="text-forest-900 font-medium truncate">
+                            {item.quantity}× {item.name} {item.size ? `(${item.size})` : ''}
+                          </span>
+                          <span className="font-serif font-bold text-forest-950 shrink-0 ml-2">₹{item.price * item.quantity}</span>
+                        </div>
+                      ))}
+                    </div>
+
+                    {/* ===== LIVE ORDER TRACKER ===== */}
+                    <div className="p-4 bg-forest-50/50 rounded-2xl border border-forest-200/80 space-y-4">
+                      <div className="flex items-center justify-between">
+                        <h4 className="text-xs font-bold text-forest-950 uppercase tracking-wider">Order Progress</h4>
+                        <div className="flex items-center gap-1.5 text-[11px] text-forest-700 font-mono font-bold bg-white px-2 py-0.5 rounded-full border border-forest-200">
+                          <Clock className="w-3 h-3" />
+                          <span>{formatElapsed(elapsedSeconds)}</span>
+                        </div>
+                      </div>
+
+                      {/* Progress Bar */}
+                      <div className="w-full h-2 bg-cream-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full rounded-full transition-all duration-1000 ease-out"
+                          style={{
+                            width: `${getProgress()}%`,
+                            background: currentStep >= 3
+                              ? 'linear-gradient(90deg, #10b981, #059669)'
+                              : 'linear-gradient(90deg, #25D366, #128C7E)',
+                          }}
+                        />
+                      </div>
+
+                      {/* Estimated Time */}
+                      <div className="text-center">
+                        <p className="text-[10px] text-gray-400 uppercase tracking-wider">Estimated Prep Time</p>
+                        <p className="text-sm font-bold text-forest-950 font-serif">
+                          {sentOrder.estimatedTime.min} – {sentOrder.estimatedTime.max} minutes
+                        </p>
+                      </div>
+
+                      {/* Step Tracker */}
+                      <div className="space-y-0">
+                        {ORDER_STEPS.map((step, idx) => {
+                          const StepIcon = step.icon;
+                          const isActive = idx === currentStep;
+                          const isDone = idx < currentStep;
+                          const isPending = idx > currentStep;
+
+                          return (
+                            <div key={step.id} className="flex items-start gap-3">
+                              {/* Vertical Line + Circle */}
+                              <div className="flex flex-col items-center">
+                                <div
+                                  className={`w-7 h-7 rounded-full flex items-center justify-center shrink-0 transition-all duration-500 ${
+                                    isDone
+                                      ? 'bg-emerald-500 text-white shadow-sm'
+                                      : isActive
+                                        ? 'bg-[#25D366] text-white shadow-md ring-4 ring-[#25D366]/20'
+                                        : 'bg-cream-200 text-gray-400'
+                                  }`}
+                                >
+                                  {isDone ? (
+                                    <CheckCircle2 className="w-3.5 h-3.5" />
+                                  ) : (
+                                    <StepIcon className="w-3.5 h-3.5" />
+                                  )}
+                                </div>
+                                {idx < ORDER_STEPS.length - 1 && (
+                                  <div
+                                    className={`w-0.5 h-8 transition-all duration-500 ${
+                                      isDone ? 'bg-emerald-400' : 'bg-cream-200'
+                                    }`}
+                                  />
+                                )}
+                              </div>
+
+                              {/* Step Text */}
+                              <div className={`pt-1 pb-3 ${isPending ? 'opacity-40' : ''}`}>
+                                <p className={`text-xs font-bold ${isActive ? 'text-forest-950' : isDone ? 'text-emerald-700' : 'text-gray-500'}`}>
+                                  {step.label}
+                                  {isActive && (
+                                    <span className="inline-block ml-1.5 w-1.5 h-1.5 rounded-full bg-[#25D366] animate-pulse" />
+                                  )}
+                                </p>
+                                <p className="text-[10px] text-gray-500 mt-0.5">{step.description}</p>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {/* Place New Order Button */}
+                    <button
+                      onClick={handleNewOrder}
+                      className="w-full py-3 px-6 rounded-full bg-forest-800 hover:bg-forest-700 text-cream-100 font-semibold text-sm transition-all flex items-center justify-center gap-2 active:scale-95"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                      <span>Place Another Order</span>
+                    </button>
+                  </div>
+
+                ) : cart.length === 0 ? (
+                  /* ===== EMPTY CART ===== */
                   <div className="text-center py-16 space-y-3">
                     <div className="w-14 h-14 rounded-full bg-cream-100 text-forest-800 flex items-center justify-center mx-auto">
                       <ShoppingBag className="w-6 h-6 text-gray-400" />
@@ -130,8 +378,9 @@ export default function WhatsAppCartDrawer() {
                     </button>
                   </div>
                 ) : (
+                  /* ===== CART ITEMS ===== */
                   <>
-                    {/* Dine-In / Takeaway Toggle inside Drawer */}
+                    {/* Dine-In / Takeaway Toggle */}
                     <div className="p-3 bg-cream-100/70 rounded-2xl border border-cream-200/80">
                       <div className="flex items-center justify-between text-xs">
                         <span className="font-bold text-forest-950">Order Type:</span>
@@ -242,7 +491,7 @@ export default function WhatsAppCartDrawer() {
               </div>
 
               {/* Drawer Footer — WhatsApp Send Button */}
-              {cart.length > 0 && (
+              {!sentOrder && cart.length > 0 && (
                 <div className="p-4 sm:p-6 bg-cream-50 border-t border-cream-200 space-y-3.5">
                   <div className="flex items-center justify-between">
                     <div>
