@@ -626,9 +626,10 @@ export default function WhatsAppCartDrawer() {
                                   type="button"
                                   onClick={() => handleReorderClick(past)}
                                   className="px-3.5 py-1.5 rounded-xl bg-forest-800 hover:bg-forest-900 text-cream-100 text-xs font-bold transition-all flex items-center gap-1.5 shadow-sm active:scale-95"
+                                  title="1-Tap Reorder"
                                 >
                                   <RotateCcw className="w-3.5 h-3.5 text-olive-300" />
-                                  <span>Reorder (1-Tap)</span>
+                                  <span>1-Tap</span>
                                 </button>
                               </div>
                             </div>
