@@ -64,6 +64,33 @@ export function CartProvider({ children }) {
     }
   });
 
+  // Active Category & Item Highlight for deep linking from Hero / Featured items
+  const [selectedCategory, setSelectedCategory] = useState('all');
+  const [highlightedItemId, setHighlightedItemId] = useState(null);
+
+  const openDishInMenu = (dishId, categoryId = null) => {
+    if (categoryId) {
+      setSelectedCategory(categoryId);
+    }
+    if (dishId) {
+      setHighlightedItemId(dishId);
+    }
+    navigateTo('menu');
+
+    // Scroll to the targeted dish
+    setTimeout(() => {
+      const el = document.getElementById(`item-${dishId}`);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 150);
+
+    // Keep highlight active for 4.5 seconds
+    setTimeout(() => {
+      setHighlightedItemId(null);
+    }, 4500);
+  };
+
   const navigateTo = (view) => {
     setCurrentView(view);
     try {
@@ -366,7 +393,12 @@ export function CartProvider({ children }) {
       saveOrderToHistory,
       reorderPastOrder,
       deleteOrderFromHistory,
-      clearOrderHistory
+      clearOrderHistory,
+      selectedCategory,
+      setSelectedCategory,
+      highlightedItemId,
+      setHighlightedItemId,
+      openDishInMenu
     }}>
       {children}
     </CartContext.Provider>

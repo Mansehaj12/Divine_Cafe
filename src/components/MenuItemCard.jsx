@@ -3,7 +3,7 @@ import { Plus, Minus } from 'lucide-react';
 import { useCart } from '../context/useCart';
 
 export default function MenuItemCard({ item }) {
-  const { addToCart, cart, updateQuantity } = useCart();
+  const { addToCart, cart, updateQuantity, highlightedItemId } = useCart();
   const hasMultipleSizes = Boolean(item.sizes && item.sizes.length > 1);
   const [selectedSize, setSelectedSize] = useState(
     hasMultipleSizes ? item.sizes[0].label : null
@@ -13,6 +13,8 @@ export default function MenuItemCard({ item }) {
   useEffect(() => {
     setImgSrc(item.image);
   }, [item.image]);
+
+  const isHighlighted = highlightedItemId === item.id;
 
   // Compute active price
   const activePrice = hasMultipleSizes
@@ -30,19 +32,31 @@ export default function MenuItemCard({ item }) {
   };
 
   return (
-    <div className="bg-white rounded-2xl p-4 sm:p-5 border border-cream-200/90 shadow-xs hover:shadow-md transition-all duration-200 flex items-start justify-between gap-4">
+    <div 
+      id={`item-${item.id}`}
+      className={`rounded-2xl p-4 sm:p-5 border transition-all duration-300 flex items-start justify-between gap-4 scroll-mt-28 ${
+        isHighlighted 
+          ? 'bg-amber-50/70 border-olive-500 ring-4 ring-olive-400/60 shadow-xl scale-[1.01]' 
+          : 'bg-white border-cream-200/90 shadow-xs hover:shadow-md'
+      }`}
+    >
       
       {/* Left Column: Food Details (Veg Icon, Title, Price, Description, Size Selector) */}
       <div className="flex-1 min-w-0 flex flex-col justify-start">
         
         {/* Pure Veg Green Icon (Standard Indian FSSAI symbol) */}
-        <div className="flex items-center gap-2 mb-1">
+        <div className="flex items-center gap-2 mb-1 flex-wrap">
           <span className="veg-badge scale-90">
             <span className="veg-dot"></span>
           </span>
           {item.isPopular && (
             <span className="text-[10px] font-bold uppercase tracking-wider text-olive-700 bg-olive-50 px-2 py-0.5 rounded-full border border-olive-200/60">
               Popular Pick
+            </span>
+          )}
+          {isHighlighted && (
+            <span className="text-[10px] font-bold uppercase tracking-wider text-forest-950 bg-olive-300 px-2.5 py-0.5 rounded-full shadow-xs animate-pulse">
+              ★ Selected Item
             </span>
           )}
         </div>

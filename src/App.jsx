@@ -13,8 +13,8 @@ import MenuPage from './components/MenuPage';
 import SplashScreen from './components/SplashScreen';
 import InstallPWA from './components/InstallPWA';
 
-function AppContent({ selectedCategory, setSelectedCategory }) {
-  const { currentView } = useCart();
+function AppContent() {
+  const { currentView, selectedCategory, setSelectedCategory } = useCart();
 
   // 1. DEDICATED MENU PAGE (NO bottom navigator bar on this page!)
   if (currentView === 'menu') {
@@ -56,7 +56,6 @@ function AppContent({ selectedCategory, setSelectedCategory }) {
 }
 
 export default function App() {
-  const [selectedCategory, setSelectedCategory] = useState("all");
   const [showSplash, setShowSplash] = useState(() => {
     try {
       return !sessionStorage.getItem('divine_splash_seen');
@@ -75,10 +74,7 @@ export default function App() {
   return (
     <CartProvider>
       {showSplash && <SplashScreen onComplete={handleSplashComplete} />}
-      <AppContent 
-        selectedCategory={selectedCategory}
-        setSelectedCategory={setSelectedCategory}
-      />
+      <AppContent />
       <InstallPWA />
     </CartProvider>
   );

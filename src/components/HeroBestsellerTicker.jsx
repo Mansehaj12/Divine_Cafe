@@ -1,10 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Sparkles, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react';
+import { useCart } from '../context/CartContext';
 
 export default function HeroBestsellerTicker() {
+  const { openDishInMenu } = useCart();
+
   const bestsellers = [
     {
       id: "pz-3",
+      categoryId: "thin-crust-pizzas",
       name: "Paneer Makhni Pizza",
       tag: "Customer Favorite",
       price: "From ₹240",
@@ -13,6 +17,7 @@ export default function HeroBestsellerTicker() {
     },
     {
       id: "bf-1",
+      categoryId: "breakfast",
       name: "Mix Veg Poha",
       tag: "Breakfast Special",
       price: "₹120",
@@ -21,6 +26,7 @@ export default function HeroBestsellerTicker() {
     },
     {
       id: "mj-5",
+      categoryId: "mojito-drinks",
       name: "Blue Lagoon Mojito",
       tag: "Signature Cooler",
       price: "₹120",
@@ -29,6 +35,7 @@ export default function HeroBestsellerTicker() {
     },
     {
       id: "ps-4",
+      categoryId: "pasta",
       name: "Mix Sauce Pasta",
       tag: "Cheesy & Spicy",
       price: "From ₹150",
@@ -37,6 +44,7 @@ export default function HeroBestsellerTicker() {
     },
     {
       id: "bg-2",
+      categoryId: "burgers",
       name: "Royal Paneer Burger",
       tag: "Grilled Special",
       price: "₹90",
@@ -45,6 +53,7 @@ export default function HeroBestsellerTicker() {
     },
     {
       id: "ch-2",
+      categoryId: "chai-and-tea",
       name: "Organic Masala Chai",
       tag: "Simmered Spices",
       price: "₹50",
@@ -55,11 +64,11 @@ export default function HeroBestsellerTicker() {
 
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  // Auto-slide every 3.5 seconds
+  // Auto-slide every 4 seconds
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % bestsellers.length);
-    }, 3500);
+    }, 4000);
     return () => clearInterval(timer);
   }, [bestsellers.length]);
 
@@ -75,17 +84,17 @@ export default function HeroBestsellerTicker() {
 
   const active = bestsellers[currentIndex];
 
-  const handleScrollToMenu = () => {
-    const el = document.getElementById('menu');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
+  const handleOpenDish = () => {
+    openDishInMenu(active.id, active.categoryId);
   };
 
   return (
     <div className="w-full my-4">
-      {/* Big Visual Photo Slider (No Quick Add, Large Appetizing Photo) */}
+      {/* Big Visual Photo Slider — Clicking opens the exact dish on Menu */}
       <div 
-        onClick={handleScrollToMenu}
-        className="group relative w-full h-56 sm:h-64 md:h-72 rounded-3xl overflow-hidden shadow-2xl border-2 border-forest-600/70 cursor-pointer bg-forest-950"
+        onClick={handleOpenDish}
+        className="group relative w-full h-56 sm:h-64 md:h-72 rounded-3xl overflow-hidden shadow-2xl border-2 border-forest-600/70 cursor-pointer bg-forest-950 transition-all hover:border-olive-400"
+        title={`View ${active.name} on menu`}
       >
         {/* Full-bleed Photo with Smooth Cross-fade Animation */}
         <img
@@ -97,7 +106,7 @@ export default function HeroBestsellerTicker() {
         />
 
         {/* Gradient Overlay for Text Readability */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/35 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-black/20" />
 
         {/* Pure Veg Badge Top Left */}
         <div className="absolute top-3 left-3 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full shadow-md flex items-center gap-1.5 z-10">
@@ -118,7 +127,7 @@ export default function HeroBestsellerTicker() {
         {/* Bottom Dish Information Overlay */}
         <div className="absolute bottom-0 left-0 right-0 p-4 sm:p-5 z-10 flex items-end justify-between gap-3">
           <div className="min-w-0 flex-1">
-            <h3 className="font-serif text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md truncate">
+            <h3 className="font-serif text-xl sm:text-2xl font-bold text-white tracking-tight drop-shadow-md truncate group-hover:text-olive-200 transition-colors">
               {active.name}
             </h3>
             <p className="text-xs text-cream-200/90 font-light mt-0.5 line-clamp-1 drop-shadow-sm">
@@ -130,9 +139,17 @@ export default function HeroBestsellerTicker() {
             <div className="font-serif font-bold text-base sm:text-xl text-olive-300 drop-shadow-md">
               {active.price}
             </div>
-            <span className="text-[10px] text-cream-300/80 uppercase tracking-widest block font-medium">
-              View on Menu →
-            </span>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                handleOpenDish();
+              }}
+              className="mt-1 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-forest-800/95 hover:bg-olive-500 text-cream-100 hover:text-forest-950 border border-olive-400/40 text-[10px] sm:text-xs font-bold uppercase tracking-wider shadow-md transition-all active:scale-95"
+            >
+              <span>View on Menu</span>
+              <ArrowRight className="w-3 h-3 stroke-[2.5]" />
+            </button>
           </div>
         </div>
 
@@ -140,7 +157,7 @@ export default function HeroBestsellerTicker() {
         <button
           type="button"
           onClick={prevSlide}
-          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 z-20"
+          className="absolute left-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 z-20"
           aria-label="Previous bestseller photo"
         >
           <ChevronLeft className="w-5 h-5" />
@@ -148,7 +165,7 @@ export default function HeroBestsellerTicker() {
         <button
           type="button"
           onClick={nextSlide}
-          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/40 hover:bg-black/70 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 z-20"
+          className="absolute right-2.5 top-1/2 -translate-y-1/2 w-8 h-8 rounded-full bg-black/50 hover:bg-black/80 text-white flex items-center justify-center backdrop-blur-xs transition-all opacity-0 group-hover:opacity-100 z-20"
           aria-label="Next bestseller photo"
         >
           <ChevronRight className="w-5 h-5" />
@@ -165,11 +182,11 @@ export default function HeroBestsellerTicker() {
                 setCurrentIndex(idx);
               }}
               className={`h-1.5 rounded-full transition-all duration-300 ${
-                currentIndex === idx
+                idx === currentIndex
                   ? 'w-7 bg-olive-400'
-                  : 'w-2 bg-white/40 hover:bg-white/70'
+                  : 'w-1.5 bg-white/40 hover:bg-white/70'
               }`}
-              aria-label={`Slide to ${item.name}`}
+              aria-label={`Go to slide ${idx + 1}`}
             />
           ))}
         </div>

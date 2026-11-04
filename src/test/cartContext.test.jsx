@@ -208,4 +208,16 @@ describe('CartContext - Cart Math & State Logic', () => {
     expect(decodedMsg).toContain('French Fries* × 1 = ₹90');
     expect(decodedMsg).toContain('Total Amount:* ₹90');
   });
+
+  it('correctly navigates and highlights dish when openDishInMenu is called', () => {
+    const { result } = renderHook(() => useCart(), { wrapper });
+
+    act(() => {
+      result.current.openDishInMenu('bf-1', 'breakfast');
+    });
+
+    expect(result.current.currentView).toBe('menu');
+    expect(result.current.selectedCategory).toBe('breakfast');
+    expect(result.current.highlightedItemId).toBe('bf-1');
+  });
 });

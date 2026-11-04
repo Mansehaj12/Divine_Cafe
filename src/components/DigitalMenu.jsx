@@ -1,17 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Search, Sparkles, UtensilsCrossed } from 'lucide-react';
 import { menuCategories, menuItems } from '../data/menuData';
+import { useCart } from '../context/useCart';
 import MenuItemCard from './MenuItemCard';
 
 export default function DigitalMenu({ 
   activeCategory: controlledActiveCategory,
   onSelectCategory: setControlledActiveCategory
 }) {
+  const { highlightedItemId } = useCart();
   const [internalCategory, setInternalCategory] = useState("all");
   const activeCategory = controlledActiveCategory !== undefined ? controlledActiveCategory : internalCategory;
   const setActiveCategory = setControlledActiveCategory || setInternalCategory;
 
   const [searchQuery, setSearchQuery] = useState("");
+
+  // Auto-scroll to selected dish if highlighted
+  useEffect(() => {
+    if (highlightedItemId) {
+      const timer = setTimeout(() => {
+        const el = document.getElementById(`item-${highlightedItemId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+  }, [highlightedItemId, activeCategory]);
 
   // Categories list excluding 'all'
   const realCategories = useMemo(() => {
