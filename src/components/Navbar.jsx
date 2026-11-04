@@ -18,26 +18,28 @@ export default function Navbar() {
 
   const navLinks = [
     { name: 'Home', href: '#home' },
-    { name: 'Favourites', href: '#favourites' },
     { name: 'Digital Menu', href: '#menu' },
+    { name: 'Bestsellers', href: '#favourites' },
+    { name: 'Reviews', href: '#reviews' },
+    { name: 'FAQ', href: '#faq' },
     { name: 'Visit Us', href: '#location' },
     { name: 'Contact', href: '#contact' }
   ];
 
   const handleLinkClick = (e, linkHref) => {
     setMobileMenuOpen(false);
-    if (linkHref === '#menu') {
+    if (linkHref === '#menu' || linkHref === '/menu') {
       e?.preventDefault();
       navigateTo('menu');
     } else {
       navigateTo('home');
       setTimeout(() => {
-        const targetId = linkHref.replace('#', '');
+        const targetId = linkHref.replace('#', '').replace('/', '');
         const el = document.getElementById(targetId);
         if (el) {
           el.scrollIntoView({ behavior: 'smooth' });
         }
-      }, 50);
+      }, 60);
     }
   };
 

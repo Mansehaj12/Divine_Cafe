@@ -1,9 +1,28 @@
 import React from 'react';
 import { Leaf, Heart, MapPin, Phone } from 'lucide-react';
 import { cafeConfig } from '../data/cafeConfig';
+import { useCart } from '../context/CartContext';
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
+  const { navigateTo } = useCart();
+
+  const handleNav = (e, target) => {
+    e.preventDefault();
+    if (target === 'menu') {
+      navigateTo('menu');
+    } else if (target === '404') {
+      navigateTo('404');
+    } else {
+      navigateTo('home');
+      setTimeout(() => {
+        const el = document.getElementById(target);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 60);
+    }
+  };
 
   return (
     <footer className="bg-[#0e201a] text-cream-200 pt-16 pb-12 border-t border-forest-900">
@@ -41,26 +60,48 @@ export default function Footer() {
           {/* Quick Links */}
           <div className="lg:col-span-3 space-y-3">
             <h4 className="text-xs uppercase tracking-widest text-white font-semibold">
-              Navigation
+              Explore Divine Cafe
             </h4>
             <ul className="space-y-2 text-xs sm:text-sm text-cream-300/80">
               <li>
-                <a href="#home" className="hover:text-white transition-colors">Home</a>
+                <a href="#home" onClick={(e) => handleNav(e, 'home')} className="hover:text-white transition-colors">
+                  Divine Cafe Home
+                </a>
               </li>
               <li>
-                <a href="#highlights" className="hover:text-white transition-colors">Our Values</a>
+                <a href="#menu" onClick={(e) => handleNav(e, 'menu')} className="hover:text-white transition-colors">
+                  Digital Menu & Online Ordering
+                </a>
               </li>
               <li>
-                <a href="#favourites" className="hover:text-white transition-colors">Customer Favourites</a>
+                <a href="#favourites" onClick={(e) => handleNav(e, 'favourites')} className="hover:text-white transition-colors">
+                  Customer Favourites & Bestsellers
+                </a>
               </li>
               <li>
-                <a href="#menu" className="hover:text-white transition-colors">Digital Menu (52 Items)</a>
+                <a href="#reviews" onClick={(e) => handleNav(e, 'reviews')} className="hover:text-white transition-colors">
+                  Guest Reviews & Experiences
+                </a>
               </li>
               <li>
-                <a href="#location" className="hover:text-white transition-colors">Visit Divine Cafe</a>
+                <a href="#faq" onClick={(e) => handleNav(e, 'faq')} className="hover:text-white transition-colors">
+                  Frequently Asked Questions
+                </a>
               </li>
               <li>
-                <a href="#contact" className="hover:text-white transition-colors">Contact & WhatsApp</a>
+                <a href="#location" onClick={(e) => handleNav(e, 'location')} className="hover:text-white transition-colors">
+                  Visit Baradari Garden & Directions
+                </a>
+              </li>
+              <li>
+                <a href="/qr-standee.html" className="hover:text-white transition-colors">
+                  Table QR Standee
+                </a>
+              </li>
+              <li>
+                <a href="/404" onClick={(e) => handleNav(e, '404')} className="hover:text-white transition-colors text-cream-400/60">
+                  Custom 404 Page
+                </a>
               </li>
             </ul>
           </div>

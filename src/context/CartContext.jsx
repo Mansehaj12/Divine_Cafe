@@ -52,17 +52,57 @@ export function CartProvider({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState('cart'); // 'cart' | 'history'
 
-  // View routing: 'home' | 'menu'
-  const [currentView, setCurrentView] = useState(() => {
+  // Helper to determine view based on path / hash
+  const resolveViewFromLocation = () => {
     try {
-      if (typeof window !== 'undefined' && window.location.hash === '#menu') {
-        return 'menu';
+      if (typeof window === 'undefined') return 'home';
+      const path = window.location.pathname.replace(/\/$/, '');
+      const hash = window.location.hash;
+      if (path === '/menu' || hash === '#menu') return 'menu';
+      if (path === '/404' || hash === '#404') return '404';
+      if (path && path !== '' && path !== '/' && path !== '/index.html' && path !== '/qr-standee.html') {
+        return '404';
       }
       return 'home';
     } catch {
       return 'home';
     }
-  });
+  };
+
+  // View routing: 'home' | 'menu' | '404'
+  const [currentView, setCurrentView] = useState(resolveViewFromLocation);
+
+  // Sync document title and meta description dynamically per page
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    const metaDesc = document.querySelector('meta[name="description"]');
+
+    if (currentView === 'menu') {
+      document.title = "Digital Menu & Online Ordering | Divine Cafe";
+      if (metaDesc) {
+        metaDesc.setAttribute(
+          'content',
+          "Browse our pure vegetarian café menu featuring handcrafted pizzas, gourmet sandwiches, burgers, cold brews, and healthy bites. Order fresh to your table or doorstep."
+        );
+      }
+    } else if (currentView === '404') {
+      document.title = "Page Not Found (404) | Divine Cafe";
+      if (metaDesc) {
+        metaDesc.setAttribute(
+          'content',
+          "The page you are looking for does not exist or has moved. Explore our fresh vegetarian menu or return to Divine Cafe's homepage."
+        );
+      }
+    } else {
+      document.title = "Divine Cafe | Pure Vegetarian Café in Baradari Garden, Patiala";
+      if (metaDesc) {
+        metaDesc.setAttribute(
+          'content',
+          "Experience Divine Cafe inside Baradari Garden, Patiala. Serving fresh handcrafted thin-crust pizzas, artisanal coffee, wholesome wraps, and cool coolers in a calm green sanctuary."
+        );
+      }
+    }
+  }, [currentView]);
 
   // Active Category & Item Highlight for deep linking from Hero / Featured items
   const [selectedCategory, setSelectedCategory] = useState('all');
@@ -96,8 +136,10 @@ export function CartProvider({ children }) {
     try {
       if (view === 'menu') {
         window.location.hash = 'menu';
+      } else if (view === '404') {
+        window.location.hash = '404';
       } else {
-        if (window.location.hash === '#menu') {
+        if (window.location.hash === '#menu' || window.location.hash === '#404') {
           window.history.pushState(null, '', window.location.pathname + window.location.search);
         }
       }
@@ -107,13 +149,7 @@ export function CartProvider({ children }) {
 
   useEffect(() => {
     const handleHash = () => {
-      try {
-        if (window.location.hash === '#menu') {
-          setCurrentView('menu');
-        } else {
-          setCurrentView('home');
-        }
-      } catch {}
+      setCurrentView(resolveViewFromLocation());
     };
     window.addEventListener('hashchange', handleHash);
     window.addEventListener('popstate', handleHash);

@@ -1,0 +1,10 @@
+# robots.txt for Divine Cafe (https://divinecafe.in)
+User-agent: *
+Allow: /
+
+# Private and internal operational routes
+Disallow: /api/
+Disallow: /kitchen
+
+# Official Sitemap index
+Sitemap: https://divinecafe.in/sitemap.xml

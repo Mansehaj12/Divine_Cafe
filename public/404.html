@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests" />
+  <title>Page Not Found (404) | Divine Cafe</title>
+  <meta name="description" content="The page you are looking for does not exist or has moved. Explore our fresh vegetarian menu or return to Divine Cafe's homepage." />
+  <link rel="icon" type="image/svg+xml" href="/pwa-icon.svg" />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --forest-950: #0a1f15;
+      --forest-900: #143826;
+      --forest-800: #1e4d35;
+      --forest-700: #2a6447;
+      --cream-50: #faf8f5;
+      --cream-100: #f5f1eb;
+      --cream-200: #ebe4d8;
+      --olive-400: #88a77b;
+      --gold-500: #d4a359;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+      background-color: var(--cream-50);
+      color: var(--forest-950);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+      line-height: 1.6;
+    }
+
+    .container {
+      max-width: 640px;
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid var(--cream-200);
+      border-radius: 24px;
+      box-shadow: 0 20px 45px -15px rgba(20, 56, 38, 0.12);
+      padding: 40px 32px;
+      text-align: center;
+    }
+
+    .badge-icon {
+      width: 72px;
+      height: 72px;
+      margin: 0 auto 20px;
+      background: linear-gradient(135deg, #143826 0%, #1e4d35 100%);
+      color: #ffffff;
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 10px 25px -5px rgba(20, 56, 38, 0.35);
+    }
+
+    .badge-icon svg {
+      width: 36px;
+      height: 36px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
+
+    .brand-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 0.18em;
+      color: var(--forest-700);
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+
+    .error-code {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--forest-900);
+      margin-bottom: 12px;
+    }
+
+    .error-title {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-size: 26px;
+      font-weight: 600;
+      color: #1a2a22;
+      margin-bottom: 14px;
+    }
+
+    .error-description {
+      font-size: 15px;
+      color: #4b5f54;
+      margin-bottom: 28px;
+      max-width: 480px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .actions-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    @media (min-width: 520px) {
+      .actions-grid {
+        flex-direction: row;
+        justify-content: center;
+      }
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 13px 22px;
+      border-radius: 9999px;
+      font-size: 14px;
+      font-weight: 600;
+      text-decoration: none;
+      transition: all 0.2s ease;
+      cursor: pointer;
+    }
+
+    .btn-primary {
+      background: var(--forest-900);
+      color: #ffffff;
+      box-shadow: 0 4px 14px rgba(20, 56, 38, 0.25);
+    }
+
+    .btn-primary:hover {
+      background: var(--forest-800);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--cream-100);
+      color: var(--forest-900);
+      border: 1px solid var(--cream-200);
+    }
+
+    .btn-secondary:hover {
+      background: var(--cream-200);
+      transform: translateY(-1px);
+    }
+
+    .helpful-links {
+      border-top: 1px solid var(--cream-200);
+      padding-top: 20px;
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 16px;
+      font-size: 13px;
+    }
+
+    .helpful-links a {
+      color: var(--forest-700);
+      text-decoration: none;
+      font-weight: 500;
+    }
+
+    .helpful-links a:hover {
+      text-decoration: underline;
+      color: var(--forest-900);
+    }
+
+    .footer-note {
+      margin-top: 20px;
+      font-size: 12px;
+      color: #7b8d83;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <main class="container">
+    <div class="badge-icon">
+      <!-- Leaf icon -->
+      <svg viewBox="0 0 24 24">
+        <path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/>
+        <path d="M2 21c0-3 1.85-5.36 5.08-6C9.5 14.52 12 13 13 12"/>
+      </svg>
+    </div>
+
+    <p class="brand-title">Divine Cafe • Baradari Garden</p>
+    <div class="error-code">404</div>
+    <h1 class="error-title">Page Not Found</h1>
+    <p class="error-description">
+      Looks like you've wandered off the garden path! The page you were looking for doesn't exist, has moved, or the link may have an error.
+    </p>
+
+    <div class="actions-grid">
+      <a href="/" class="btn btn-primary">
+        ← Return to Homepage
+      </a>
+      <a href="/#menu" class="btn btn-secondary">
+        Browse Digital Menu
+      </a>
+    </div>
+
+    <div class="helpful-links">
+      <a href="/#location">📍 Baradari Garden Directions</a>
+      <span>•</span>
+      <a href="https://wa.me/919988959413" target="_blank" rel="noopener noreferrer">💬 Order on WhatsApp</a>
+      <span>•</span>
+      <a href="/qr-standee.html">📱 Table QR Standee</a>
+    </div>
+  </main>
+
+  <footer class="footer-note">
+    Divine Cafe — 100% Pure Vegetarian Sanctuary • Mall Rd, inside Baradari Garden, Patiala
+  </footer>
+</body>
+</html>

@@ -10,13 +10,21 @@ import Footer from './components/Footer';
 import WhatsAppCartDrawer from './components/WhatsAppCartDrawer';
 import BottomNav from './components/BottomNav';
 import MenuPage from './components/MenuPage';
+import NotFoundPage from './components/NotFoundPage';
+import CustomerReviews from './components/CustomerReviews';
+import FAQSection from './components/FAQSection';
 import SplashScreen from './components/SplashScreen';
 import InstallPWA from './components/InstallPWA';
 
 function AppContent() {
   const { currentView, selectedCategory, setSelectedCategory } = useCart();
 
-  // 1. DEDICATED MENU PAGE (NO bottom navigator bar on this page!)
+  // 1. CUSTOM 404 NOT FOUND PAGE
+  if (currentView === '404') {
+    return <NotFoundPage />;
+  }
+
+  // 2. DEDICATED MENU PAGE (NO bottom navigator bar on this page!)
   if (currentView === 'menu') {
     return (
       <MenuPage 
@@ -26,7 +34,7 @@ function AppContent() {
     );
   }
 
-  // 2. HOME PAGE (Features Hero, Popular Picks, Values, Directions, & Fixed Bottom Nav)
+  // 3. HOME PAGE (Features Hero, Popular Picks, Values, Reviews, FAQs, Directions, & Fixed Bottom Nav)
   return (
     <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-forest-950 font-sans selection:bg-[#234438] selection:text-[#FAF7F2] pb-16 md:pb-0">
       
@@ -38,6 +46,8 @@ function AppContent() {
         <Hero />
         <PopularPicks />
         <Highlights />
+        <CustomerReviews />
+        <FAQSection />
         <LocationSection />
         <ContactWhatsApp />
       </main>
