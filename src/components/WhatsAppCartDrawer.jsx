@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { 
   X, Trash2, Plus, Minus, ShoppingBag, ArrowRight, CheckCircle2, 
-  Clock, ChefHat, PartyPopper, RotateCcw, History, Calendar, Utensils
+  Clock, ChefHat, PartyPopper, RotateCcw, History, Calendar, Utensils, BookOpen, ArrowLeft
 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { cafeConfig } from '../data/cafeConfig';
@@ -55,6 +55,7 @@ export default function WhatsAppCartDrawer() {
     setIsDrawerOpen,
     drawerTab,
     setDrawerTab,
+    navigateTo,
     updateQuantity,
     removeFromCart,
     clearCart,
@@ -216,21 +217,22 @@ export default function WhatsAppCartDrawer() {
         </div>
       )}
 
-      {/* Slide-over Drawer Overlay */}
+      {/* Full-Screen Cart & Orders Window (100% width on mobile, no empty side space) */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 z-50 overflow-hidden overscroll-none">
-          <div
-            className="absolute inset-0 bg-forest-950/70 backdrop-blur-sm transition-opacity"
-            onClick={() => setIsDrawerOpen(false)}
-          />
-
-          <div className="fixed inset-y-0 right-0 max-w-full flex pl-6 sm:pl-10">
-            <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between h-full overscroll-contain">
+        <div className="fixed inset-0 z-50 overflow-hidden overscroll-none bg-forest-950/70 backdrop-blur-xs flex justify-center items-stretch sm:items-center sm:p-4">
+          <div className="w-full h-full sm:h-[94vh] sm:max-w-2xl bg-white sm:rounded-3xl shadow-2xl flex flex-col justify-between overflow-hidden animate-in fade-in duration-150">
               
               {/* Drawer Top Bar */}
               <div className="bg-[#143826] text-cream-100 border-b border-forest-800">
                 <div className="p-4 sm:p-5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
+                    <button
+                      onClick={() => setIsDrawerOpen(false)}
+                      className="p-1.5 rounded-lg bg-forest-800 text-cream-200 hover:text-white hover:bg-forest-700 sm:hidden"
+                      aria-label="Back"
+                    >
+                      <ArrowLeft className="w-5 h-5" />
+                    </button>
                     <div className="w-8 h-8 rounded-lg bg-forest-800 flex items-center justify-center text-olive-300">
                       {sentOrder ? (
                         <CheckCircle2 className="w-4 h-4" />
@@ -261,7 +263,7 @@ export default function WhatsAppCartDrawer() {
                   <button
                     onClick={() => setIsDrawerOpen(false)}
                     className="p-1.5 rounded-lg bg-forest-800 text-cream-200 hover:text-white hover:bg-forest-700"
-                    aria-label="Close drawer"
+                    aria-label="Close"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -471,7 +473,10 @@ export default function WhatsAppCartDrawer() {
                       </button>
 
                       <button
-                        onClick={handleNewOrder}
+                        onClick={() => {
+                          handleNewOrder();
+                          navigateTo('menu');
+                        }}
                         className="flex-1 py-3 px-4 rounded-xl bg-forest-800 hover:bg-forest-700 text-cream-100 text-xs font-bold transition-all flex items-center justify-center gap-1.5 active:scale-95 shadow-sm"
                       >
                         <RotateCcw className="w-4 h-4" />
@@ -497,12 +502,24 @@ export default function WhatsAppCartDrawer() {
                         <p className="text-xs text-gray-500 max-w-xs mx-auto leading-relaxed">
                           Whenever you send an order on WhatsApp, it will be automatically remembered here so you can reorder your favourites in 1 tap!
                         </p>
-                        <button
-                          onClick={() => setDrawerTab('cart')}
-                          className="mt-2 px-5 py-2 rounded-full bg-forest-800 text-cream-100 text-xs font-semibold shadow-sm"
-                        >
-                          View Current Bag
-                        </button>
+                        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 pt-1">
+                          <button
+                            onClick={() => {
+                              setIsDrawerOpen(false);
+                              navigateTo('menu');
+                            }}
+                            className="px-5 py-2 rounded-full bg-forest-800 hover:bg-forest-900 text-cream-100 text-xs font-semibold shadow-sm inline-flex items-center gap-1.5 active:scale-95 transition-all"
+                          >
+                            <BookOpen className="w-3.5 h-3.5 text-olive-300" />
+                            <span>Browse Menu</span>
+                          </button>
+                          <button
+                            onClick={() => setDrawerTab('cart')}
+                            className="px-5 py-2 rounded-full bg-cream-200 hover:bg-cream-300 text-forest-900 text-xs font-semibold shadow-sm"
+                          >
+                            View Current Bag
+                          </button>
+                        </div>
                       </div>
                     ) : (
                       /* Past Orders List */
@@ -613,10 +630,14 @@ export default function WhatsAppCartDrawer() {
                     )}
                     <div className="pt-2">
                       <button
-                        onClick={() => setIsDrawerOpen(false)}
-                        className="px-5 py-2 rounded-full bg-forest-800 text-cream-100 text-xs font-semibold"
+                        onClick={() => {
+                          setIsDrawerOpen(false);
+                          navigateTo('menu');
+                        }}
+                        className="px-6 py-2.5 rounded-full bg-forest-800 hover:bg-forest-900 text-cream-100 text-xs font-semibold shadow-md active:scale-95 transition-all inline-flex items-center gap-1.5"
                       >
-                        Browse Menu
+                        <BookOpen className="w-4 h-4 text-olive-300" />
+                        <span>Browse Menu →</span>
                       </button>
                     </div>
                   </div>
@@ -766,8 +787,7 @@ export default function WhatsAppCartDrawer() {
 
             </div>
           </div>
-        </div>
-      )}
-    </>
-  );
-}
+        )}
+      </>
+    );
+  }

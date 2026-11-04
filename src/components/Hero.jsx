@@ -1,10 +1,12 @@
 import React from 'react';
-import { ArrowDown, MapPin, Sparkles, Coffee, Utensils, HeartHandshake } from 'lucide-react';
+import { ArrowRight, MapPin, Sparkles, Coffee, Utensils, HeartHandshake } from 'lucide-react';
 import { cafeConfig } from '../data/cafeConfig';
+import { useCart } from '../context/CartContext';
 import OrderTypeSelector from './OrderTypeSelector';
 import HeroBestsellerTicker from './HeroBestsellerTicker';
 
 export default function Hero() {
+  const { navigateTo } = useCart();
   return (
     <section id="home" className="relative pt-24 pb-14 lg:pt-32 lg:pb-20 overflow-hidden bg-gradient-to-b from-[#143826] via-[#1a422e] to-[#234d36] text-cream-100">
       {/* Subtle organic background foliage ornaments */}
@@ -48,13 +50,14 @@ export default function Hero() {
 
             {/* Call to Action Buttons */}
             <div className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4 pt-2">
-              <a
-                href="#menu"
+              <button
+                type="button"
+                onClick={() => navigateTo('menu')}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-3.5 rounded-full bg-cream-100 hover:bg-white text-forest-900 font-semibold text-sm sm:text-base transition-all duration-200 shadow-md hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
               >
-                <span>Explore Our Menu</span>
-                <ArrowDown className="w-4 h-4 text-forest-800" />
-              </a>
+                <span>Explore Full Menu</span>
+                <ArrowRight className="w-4 h-4 text-forest-800" />
+              </button>
 
               <a
                 href="#location"

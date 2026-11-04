@@ -32,6 +32,50 @@ export function CartProvider({ children }) {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [drawerTab, setDrawerTab] = useState('cart'); // 'cart' | 'history'
 
+  // View routing: 'home' | 'menu'
+  const [currentView, setCurrentView] = useState(() => {
+    try {
+      if (typeof window !== 'undefined' && window.location.hash === '#menu') {
+        return 'menu';
+      }
+      return 'home';
+    } catch {
+      return 'home';
+    }
+  });
+
+  const navigateTo = (view) => {
+    setCurrentView(view);
+    try {
+      if (view === 'menu') {
+        window.location.hash = 'menu';
+      } else {
+        if (window.location.hash === '#menu') {
+          window.history.pushState(null, '', window.location.pathname + window.location.search);
+        }
+      }
+    } catch {}
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    const handleHash = () => {
+      try {
+        if (window.location.hash === '#menu') {
+          setCurrentView('menu');
+        } else {
+          setCurrentView('home');
+        }
+      } catch {}
+    };
+    window.addEventListener('hashchange', handleHash);
+    window.addEventListener('popstate', handleHash);
+    return () => {
+      window.removeEventListener('hashchange', handleHash);
+      window.removeEventListener('popstate', handleHash);
+    };
+  }, []);
+
   // Table & Dining Mode State
   const [tableNumber, setTableNumber] = useState(() => {
     try {
@@ -283,6 +327,9 @@ export function CartProvider({ children }) {
       setIsDrawerOpen,
       drawerTab,
       setDrawerTab,
+      currentView,
+      setCurrentView,
+      navigateTo,
       tableNumber,
       updateTableNumber,
       diningMode,

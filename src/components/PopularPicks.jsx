@@ -4,7 +4,7 @@ import { menuItems } from '../data/menuData';
 import { useCart } from '../context/CartContext';
 
 export default function PopularPicks() {
-  const { addToCart, cart, updateQuantity } = useCart();
+  const { addToCart, cart, updateQuantity, navigateTo } = useCart();
 
   // Curated sample of featured items across diverse categories
   const featuredItems = menuItems.filter(item => item.isPopular);
@@ -27,13 +27,14 @@ export default function PopularPicks() {
             </p>
           </div>
 
-          <a
-            href="#menu"
+          <button
+            type="button"
+            onClick={() => navigateTo('menu')}
             className="inline-flex items-center gap-2 text-xs sm:text-sm font-semibold text-forest-800 hover:text-forest-600 transition-colors"
           >
             <span>View Complete Menu (52 Items)</span>
             <span>→</span>
-          </a>
+          </button>
         </div>
 
         {/* Popular Picks Grid */}

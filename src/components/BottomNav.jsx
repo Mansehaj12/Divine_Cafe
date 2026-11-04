@@ -10,7 +10,8 @@ export default function BottomNav() {
     setIsDrawerOpen, 
     drawerTab, 
     setDrawerTab, 
-    orderHistory 
+    orderHistory,
+    navigateTo
   } = useCart();
 
   const [activeTab, setActiveTab] = useState('home');
@@ -66,13 +67,10 @@ export default function BottomNav() {
 
     if (tabKey === 'home') {
       if (isDrawerOpen) setIsDrawerOpen(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      navigateTo('home');
     } else if (tabKey === 'menu') {
       if (isDrawerOpen) setIsDrawerOpen(false);
-      const menuEl = document.getElementById('menu');
-      if (menuEl) {
-        menuEl.scrollIntoView({ behavior: 'smooth' });
-      }
+      navigateTo('menu');
     } else if (tabKey === 'cart') {
       setDrawerTab('cart');
       setIsDrawerOpen(true);

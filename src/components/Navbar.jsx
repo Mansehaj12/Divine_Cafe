@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { totalCount, setIsDrawerOpen, orderHistory, setDrawerTab } = useCart();
+  const { totalCount, setIsDrawerOpen, orderHistory, setDrawerTab, navigateTo } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,8 +24,21 @@ export default function Navbar() {
     { name: 'Contact', href: '#contact' }
   ];
 
-  const handleLinkClick = () => {
+  const handleLinkClick = (e, linkHref) => {
     setMobileMenuOpen(false);
+    if (linkHref === '#menu') {
+      e?.preventDefault();
+      navigateTo('menu');
+    } else {
+      navigateTo('home');
+      setTimeout(() => {
+        const targetId = linkHref.replace('#', '');
+        const el = document.getElementById(targetId);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth' });
+        }
+      }, 50);
+    }
   };
 
   return (
@@ -40,7 +53,11 @@ export default function Navbar() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between">
             {/* Brand Logo & Tagline */}
-            <a href="#home" className="group flex items-center gap-3">
+            <a 
+              href="#home" 
+              onClick={(e) => handleLinkClick(e, '#home')}
+              className="group flex items-center gap-3"
+            >
               <div className="w-10 h-10 rounded-full bg-forest-800 border border-forest-600/60 flex items-center justify-center text-forest-200 shadow-inner group-hover:scale-105 transition-transform">
                 <Leaf className="w-5 h-5 text-olive-300" />
               </div>
@@ -60,6 +77,7 @@ export default function Navbar() {
                 <a
                   key={link.name}
                   href={link.href}
+                  onClick={(e) => handleLinkClick(e, link.href)}
                   className="text-sm font-medium text-cream-200 hover:text-white transition-colors relative py-1 after:content-[''] after:absolute after:bottom-0 after:left-0 after:w-0 after:h-0.5 after:bg-olive-400 hover:after:w-full after:transition-all after:duration-300"
                 >
                   {link.name}
@@ -130,7 +148,7 @@ export default function Navbar() {
               <a
                 key={link.name}
                 href={link.href}
-                onClick={handleLinkClick}
+                onClick={(e) => handleLinkClick(e, link.href)}
                 className="text-lg font-medium text-cream-100 hover:text-olive-300 py-2 border-b border-forest-900/60 transition-colors flex items-center justify-between"
               >
                 <span>{link.name}</span>
@@ -160,13 +178,13 @@ export default function Navbar() {
               </button>
             )}
 
-            <a
-              href="#menu"
-              onClick={handleLinkClick}
+            <button
+              type="button"
+              onClick={(e) => handleLinkClick(e, '#menu')}
               className="w-full py-3 rounded-xl bg-olive-600 hover:bg-olive-500 text-white font-medium text-center text-sm shadow-md transition-colors"
             >
               Explore Full Digital Menu
-            </a>
+            </button>
           </div>
         </div>
       )}
