@@ -3,10 +3,26 @@ import { cafeConfig } from '../data/cafeConfig';
 
 export const CartContext = createContext(null);
 
+const CART_STORAGE_KEY = 'divine_cafe_cart';
+const HISTORY_STORAGE_KEY = 'divine_cafe_order_history';
+const TABLE_STORAGE_KEY = 'divine_cafe_table';
+const MODE_STORAGE_KEY = 'divine_cafe_dining_mode';
+
 export function CartProvider({ children }) {
+  // Active Cart State
   const [cart, setCart] = useState(() => {
     try {
-      const saved = localStorage.getItem('divine_cafe_cart');
+      const saved = localStorage.getItem(CART_STORAGE_KEY);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  // Past Orders History State (saved permanently on customer phone / browser)
+  const [orderHistory, setOrderHistory] = useState(() => {
+    try {
+      const saved = localStorage.getItem(HISTORY_STORAGE_KEY);
       return saved ? JSON.parse(saved) : [];
     } catch {
       return [];
@@ -14,6 +30,7 @@ export function CartProvider({ children }) {
   });
 
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [drawerTab, setDrawerTab] = useState('cart'); // 'cart' | 'history'
 
   // Table & Dining Mode State
   const [tableNumber, setTableNumber] = useState(() => {
@@ -23,11 +40,11 @@ export function CartProvider({ children }) {
       if (urlTable) {
         const parsed = parseInt(urlTable, 10);
         if (!isNaN(parsed) && parsed > 0 && parsed <= 99) {
-          localStorage.setItem('divine_cafe_table', String(parsed));
+          localStorage.setItem(TABLE_STORAGE_KEY, String(parsed));
           return String(parsed);
         }
       }
-      return localStorage.getItem('divine_cafe_table') || '';
+      return localStorage.getItem(TABLE_STORAGE_KEY) || '';
     } catch {
       return '';
     }
@@ -35,7 +52,7 @@ export function CartProvider({ children }) {
 
   const [diningMode, setDiningMode] = useState(() => {
     try {
-      const saved = localStorage.getItem('divine_cafe_dining_mode');
+      const saved = localStorage.getItem(MODE_STORAGE_KEY);
       if (saved === 'takeaway') return 'takeaway';
       return 'dine-in';
     } catch {
@@ -53,27 +70,37 @@ export function CartProvider({ children }) {
         if (!isNaN(parsed) && parsed > 0 && parsed <= 99) {
           setTableNumber(String(parsed));
           setDiningMode('dine-in');
-          localStorage.setItem('divine_cafe_table', String(parsed));
-          localStorage.setItem('divine_cafe_dining_mode', 'dine-in');
+          localStorage.setItem(TABLE_STORAGE_KEY, String(parsed));
+          localStorage.setItem(MODE_STORAGE_KEY, 'dine-in');
         }
       }
     } catch {}
   }, []);
 
+  // Persist cart
   useEffect(() => {
     try {
-      localStorage.setItem('divine_cafe_cart', JSON.stringify(cart));
+      localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
     } catch (e) {
       console.warn("Could not save cart to localStorage", e);
     }
   }, [cart]);
+
+  // Persist order history
+  useEffect(() => {
+    try {
+      localStorage.setItem(HISTORY_STORAGE_KEY, JSON.stringify(orderHistory));
+    } catch (e) {
+      console.warn("Could not save order history to localStorage", e);
+    }
+  }, [orderHistory]);
 
   // Safe table update with validation
   const updateTableNumber = (numStr) => {
     if (!numStr || numStr.trim() === '') {
       setTableNumber('');
       try {
-        localStorage.removeItem('divine_cafe_table');
+        localStorage.removeItem(TABLE_STORAGE_KEY);
       } catch {}
       return;
     }
@@ -84,8 +111,8 @@ export function CartProvider({ children }) {
       setTableNumber(val);
       setDiningMode('dine-in');
       try {
-        localStorage.setItem('divine_cafe_table', val);
-        localStorage.setItem('divine_cafe_dining_mode', 'dine-in');
+        localStorage.setItem(TABLE_STORAGE_KEY, val);
+        localStorage.setItem(MODE_STORAGE_KEY, 'dine-in');
       } catch {}
     }
   };
@@ -94,7 +121,7 @@ export function CartProvider({ children }) {
     if (mode === 'takeaway' || mode === 'dine-in') {
       setDiningMode(mode);
       try {
-        localStorage.setItem('divine_cafe_dining_mode', mode);
+        localStorage.setItem(MODE_STORAGE_KEY, mode);
       } catch {}
     }
   };
@@ -142,6 +169,66 @@ export function CartProvider({ children }) {
 
   const clearCart = () => {
     setCart([]);
+  };
+
+  // Save completed order to customer's on-device history
+  const saveOrderToHistory = (orderData) => {
+    const newEntry = {
+      id: `DC-${Date.now().toString().slice(-4)}${Math.floor(10 + Math.random() * 90)}`,
+      createdAt: new Date().toISOString(),
+      items: orderData.items || [],
+      totalCount: orderData.totalCount || 0,
+      totalAmount: orderData.totalAmount || 0,
+      diningMode: orderData.diningMode || 'dine-in',
+      tableNumber: orderData.tableNumber || '',
+      notes: orderData.notes || ''
+    };
+
+    setOrderHistory(prev => {
+      // Keep last 30 orders
+      const updated = [newEntry, ...prev.filter(o => o.id !== newEntry.id)].slice(0, 30);
+      return updated;
+    });
+
+    return newEntry;
+  };
+
+  // 1-Click Reorder: loads previous order items into active cart
+  const reorderPastOrder = (pastOrder) => {
+    if (!pastOrder || !pastOrder.items || pastOrder.items.length === 0) return;
+
+    // Load past items into cart
+    setCart(pastOrder.items.map(item => ({
+      cartKey: item.cartKey || `${item.id}-${item.size || 'standard'}`,
+      id: item.id,
+      name: item.name,
+      size: item.size || null,
+      price: item.price,
+      image: item.image || null,
+      quantity: item.quantity || 1
+    })));
+
+    // Restore dining mode if available
+    if (pastOrder.diningMode) {
+      updateDiningMode(pastOrder.diningMode);
+    }
+    if (pastOrder.tableNumber && pastOrder.diningMode === 'dine-in') {
+      updateTableNumber(pastOrder.tableNumber);
+    }
+
+    // Switch tab to 'cart' so customer can review & send
+    setDrawerTab('cart');
+    setIsDrawerOpen(true);
+  };
+
+  // Delete single order from history
+  const deleteOrderFromHistory = (orderId) => {
+    setOrderHistory(prev => prev.filter(o => o.id !== orderId));
+  };
+
+  // Clear all past orders
+  const clearOrderHistory = () => {
+    setOrderHistory([]);
   };
 
   const totalCount = cart.reduce((acc, item) => acc + item.quantity, 0);
@@ -194,11 +281,18 @@ export function CartProvider({ children }) {
       totalAmount,
       isDrawerOpen,
       setIsDrawerOpen,
+      drawerTab,
+      setDrawerTab,
       tableNumber,
       updateTableNumber,
       diningMode,
       updateDiningMode,
-      getWhatsAppMessage
+      getWhatsAppMessage,
+      orderHistory,
+      saveOrderToHistory,
+      reorderPastOrder,
+      deleteOrderFromHistory,
+      clearOrderHistory
     }}>
       {children}
     </CartContext.Provider>

@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, X, ShoppingBag, MapPin, Sparkles, Phone, Leaf } from 'lucide-react';
+import { Menu, X, ShoppingBag, MapPin, Sparkles, Phone, Leaf, History } from 'lucide-react';
 import { cafeConfig } from '../data/cafeConfig';
 import { useCart } from '../context/CartContext';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { totalCount, setIsDrawerOpen } = useCart();
+  const { totalCount, setIsDrawerOpen, orderHistory, setDrawerTab } = useCart();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -68,12 +68,33 @@ export default function Navbar() {
             </nav>
 
             {/* Right Action Buttons */}
-            <div className="flex items-center gap-2.5 sm:gap-4">
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Past Orders Shortcut (only shown if user has past orders) */}
+              {orderHistory.length > 0 && (
+                <button
+                  onClick={() => {
+                    setDrawerTab('history');
+                    setIsDrawerOpen(true);
+                  }}
+                  className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-full bg-forest-900/70 hover:bg-forest-800 text-cream-200 hover:text-white border border-forest-700/60 text-xs font-medium transition-all active:scale-95"
+                  title="View your previous orders"
+                >
+                  <History className="w-3.5 h-3.5 text-olive-300" />
+                  <span>Past Orders</span>
+                  <span className="px-1.5 py-0.2 rounded-full bg-forest-950 text-[10px] font-bold text-olive-300">
+                    {orderHistory.length}
+                  </span>
+                </button>
+              )}
+
               {/* WhatsApp Quick Order Bag */}
               <button
-                onClick={() => setIsDrawerOpen(true)}
+                onClick={() => {
+                  setDrawerTab('cart');
+                  setIsDrawerOpen(true);
+                }}
                 className="relative flex items-center gap-2 px-3.5 py-2 rounded-full bg-forest-800/80 hover:bg-forest-700 text-cream-100 border border-forest-600/50 transition-all shadow-sm active:scale-95"
-                title="Your order enquiry bag"
+                title="Your order bag"
               >
                 <ShoppingBag className="w-4 h-4 text-olive-300" />
                 <span className="text-xs sm:text-sm font-medium hidden sm:inline">Order Bag</span>
@@ -119,6 +140,26 @@ export default function Navbar() {
           </div>
 
           <div className="flex flex-col gap-3 pt-6 border-t border-forest-800">
+            {orderHistory.length > 0 && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMobileMenuOpen(false);
+                  setDrawerTab('history');
+                  setIsDrawerOpen(true);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-forest-900 border border-forest-700/60 text-cream-100 font-medium text-xs flex items-center justify-between transition-colors hover:bg-forest-800"
+              >
+                <span className="flex items-center gap-2">
+                  <History className="w-4 h-4 text-olive-300" />
+                  <span>My Previous Orders</span>
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-forest-800 text-olive-300 font-bold text-[11px]">
+                  {orderHistory.length} orders
+                </span>
+              </button>
+            )}
+
             <a
               href="#menu"
               onClick={handleLinkClick}
